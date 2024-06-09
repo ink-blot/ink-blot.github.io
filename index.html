@@ -25,7 +25,7 @@
         const auth = getAuth(app); // Initialize Firebase Authentication
 
         // Firebase Authentication functions
-        function login() {
+        window.login = function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             signInWithEmailAndPassword(auth, email, password)
@@ -41,7 +41,7 @@
                 });
         }
 
-        function signup() {
+        window.signup = function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             createUserWithEmailAndPassword(auth, email, password)
@@ -57,7 +57,7 @@
                 });
         }
 
-        function logout() {
+        window.logout = function() {
             signOut(auth).then(() => {
                 console.log("User signed out");
                 window.location.href = "index.html"; // Replace with your target page
