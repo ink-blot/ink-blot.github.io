@@ -38,6 +38,8 @@
                 })
                 .catch(error => {
                     console.error(error);
+                    // Redirect to error page on failure
+                    window.location.href = "error.html?message=" + encodeURIComponent(error.message);
                 });
         }
 
@@ -54,6 +56,8 @@
                 })
                 .catch(error => {
                     console.error(error);
+                    // Redirect to error page on failure
+                    window.location.href = "error.html?message=" + encodeURIComponent(error.message);
                 });
         }
 
