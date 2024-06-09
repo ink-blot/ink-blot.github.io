@@ -38,8 +38,10 @@
                 })
                 .catch(error => {
                     console.error("Login failed: ", error);
+                    // Remove 'Firebase:' from the error message
+                    const errorMessage = error.message.replace('Firebase: ', '');
                     // Redirect to error page on failure
-                    window.location.href = "error.html?message=" + encodeURIComponent(error.message);
+                    window.location.href = "error.html?message=" + encodeURIComponent(errorMessage);
                 });
         }
 
@@ -56,8 +58,10 @@
                 })
                 .catch(error => {
                     console.error("Signup failed: ", error);
+                    // Remove 'Firebase:' from the error message
+                    const errorMessage = error.message.replace('Firebase: ', '');
                     // Redirect to error page on failure
-                    window.location.href = "error.html?message=" + encodeURIComponent(error.message);
+                    window.location.href = "error.html?message=" + encodeURIComponent(errorMessage);
                 });
         }
 
