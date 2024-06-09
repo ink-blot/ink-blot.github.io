@@ -25,7 +25,7 @@
         const auth = getAuth(app); // Initialize Firebase Authentication
 
         // Handle logout
-        function logout() {
+        window.logout = function() {
             signOut(auth).then(() => {
                 console.log("User signed out");
                 window.location.href = "index.html"; // Redirect to login page
