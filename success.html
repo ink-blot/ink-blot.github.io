@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome</title>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyAeZ0L7rudmT2D_Ngj2QdlXR77oVjJUqh0",
+          authDomain: "ink-blot.firebaseapp.com",
+          projectId: "ink-blot",
+          storageBucket: "ink-blot.appspot.com",
+          messagingSenderId: "314936743687",
+          appId: "1:314936743687:web:3940dfbfb5b0acd52117a2",
+          measurementId: "G-6DN1TZZJZ5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app); // Initialize Firebase Authentication
+
+        // Handle logout
+        function logout() {
+            signOut(auth).then(() => {
+                console.log("User signed out");
+                window.location.href = "index.html"; // Redirect to login page
+            }).catch(error => {
+                console.error(error);
+            });
+        }
+
+        // Check for authentication state and redirect if not signed in
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // User is signed in
+                document.getElementById('user-name').innerText = user.email;
+            } else {
+                // User is signed out, redirect to login page
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</head>
+<body>
+    <div id="welcome-container">
+        <h1>Welcome, <span id="user-name"></span></h1>
+        <button onclick="logout()">Logout</button>
+    </div>
+</body>
+</html>
