@@ -1,48 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ink-blot</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-        }
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            margin: 0;
-        }
-        main {
-            padding: 20px;
-        }
-        footer {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 10px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
+    <title>GitHub Pages Authentication</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
 </head>
 <body>
-    <header>
-        <h1>ink-blot</h1>
-    </header>
-    <main>
-        <p>https://ink-blot.github.io</p>
-    </main>
-    <footer>
-        &copy; 2024 ink-blot
-    </footer>
+    <!-- Your HTML content here -->
+    <div id="login-container">
+        <h1>Login</h1>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <button onclick="signup()">Sign Up</button>
+    </div>
+    <div id="user-container" style="display:none;">
+        <h1>Welcome, <span id="user-name"></span></h1>
+        <button onclick="logout()">Logout</button>
+    </div>
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyAeZ0L7rudmT2D_Ngj2QdlXR77oVjJUqh0",
+          authDomain: "ink-blot.firebaseapp.com",
+          projectId: "ink-blot",
+          storageBucket: "ink-blot.appspot.com",
+          messagingSenderId: "314936743687",
+          appId: "1:314936743687:web:3940dfbfb5b0acd52117a2",
+          measurementId: "G-6DN1TZZJZ5"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Firebase Authentication
+        const auth = firebase.auth();
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    // Signed in
+                    const user = userCredential.user;
+                    document.getElementById('login-container').style.display = 'none';
+                    document.getElementById('user-container').style.display = 'block';
+                    document.getElementById('user-name').innerText = user.email;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        function signup() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    // Signed in 
+                    const user = userCredential.user;
+                    document.getElementById('login-container').style.display = 'none';
+                    document.getElementById('user-container').style.display = 'block';
+                    document.getElementById('user-name').innerText = user.email;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                document.getElementById('login-container').style.display = 'block';
+                document.getElementById('user-container').style.display = 'none';
+            }).catch(error => {
+                console.error(error);
+            });
+        }
+    </script>
 </body>
 </html>
