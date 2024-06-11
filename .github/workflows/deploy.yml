@@ -11,10 +11,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3  # Updated to v3 to use the latest version
+      uses: actions/checkout@v3  # Ensure latest version for Node.js 20 support
 
     - name: Set up Node.js
-      uses: actions/setup-node@v3  # Updated to v3 to use the latest version
+      uses: actions/setup-node@v3  # Ensure latest version for Node.js 20 support
       with:
         node-version: '20'  # Specify the version of Node.js to use
 
@@ -32,8 +32,17 @@ jobs:
         FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
 
+    - name: Build the project
+      run: npm run build  # Build the project
+
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4  # Updated to v4 to use the latest version
+      uses: peaceiris/actions-gh-pages@v4  # Ensure latest version for Node.js 20 support
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist  # Specify the directory to publish
+
+    - name: Debug git configuration
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global --list
