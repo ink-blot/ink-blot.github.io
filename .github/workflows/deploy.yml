@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # Change to the branch you want to deploy from
+      - main  # Change this to your default branch if it's not 'main'
 
 jobs:
   deploy:
@@ -11,18 +11,18 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3  # Check out the latest version of the repository
 
     - name: Set up Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3  # Set up Node.js environment
       with:
-        node-version: '14'
+        node-version: '20'  # Specify the version of Node.js to use
 
     - name: Install dependencies
-      run: npm install
+      run: npm install  # Install project dependencies
 
     - name: Replace environment variables in HTML
-      run: npm run build
+      run: node replace-env.js  # Run the script to replace placeholders with environment variables
       env:
         FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
         FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
@@ -32,8 +32,11 @@ jobs:
         FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
 
+    - name: Build the project
+      run: npm run build  # Build the project
+
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4  # Deploy the built project to GitHub Pages
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
+        publish_dir: ./dist  # Specify the directory to publish
