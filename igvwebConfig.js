@@ -5,7 +5,7 @@ var igvwebConfig = {
     sessionRegistryFile: "resources/sessions/sessionRegistry.json",
 
     // Supply a drobpox api key to enable the Dropbox file picker in the load menus.  This is optional
-    dropboxAPIKey: "test",
+    dropboxAPIKey: "8glijwyao9fq8we",
     
      // Supply a Google client id to enable the Google file picker in the load menus.  This is optional
     clientId: "test.apps.googleusercontent.com",
