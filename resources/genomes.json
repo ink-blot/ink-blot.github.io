@@ -1,26 +1,4 @@
 [
-
-  {
-    "id": "Alphonso",
-    "name": "Alphonso",
-    "fastaURL": "../data/alphonso/access-0/peng_wang_alphonso_genome_multifasta_renamed.fa",
-    "indexURL": "../data/alphonso/access-0/peng_wang_alphonso_genome_multifasta_renamed.fa.fai",
-    "tracks": [
-	  {
-		"name": "FUR9702A226.bam",
-		"url": "../data/alphonso/access-0/FUR9702A226.bam",
-		"indexURL": "../data/alphonso/access-0/FUR9702A226.bam.bai",
-		"format": "bam"
-	  },
-	  {
-		"name": "FUR9702A226_filtered_indels",
-		"url": "../data/alphonso/access-0/FUR9702A226_filtered_indels.ann.vcf.gz",
-		"indexURL": "../data/alphonso/access-0/FUR9702A226_filtered_indels.ann.vcf.gz.tbi",
-		"format": "vcf"
-	  }
-  
-    ]
-  },
   {
     "id": "chm13v2.0",
     "name": "Human (T2T CHM13-v2.0)",
