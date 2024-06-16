@@ -8,6 +8,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 20px;
         }
         th, td {
             padding: 8px;
@@ -33,38 +34,12 @@
 </head>
 <body>
     <h1>Track and Index Lists</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Display Name</th>
-                <th>Select</th>
-                <th class="hidden">Track URLs</th>
-                <th class="hidden">Index URLs</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Track 1</td>
-                <td><input type="checkbox" class="track-checkbox" data-track="https://example.com/track1.bam" data-index="https://example.com/track1.bai"></td>
-                <td class="hidden"><a href="https://example.com/track1.bam">track1.bam</a></td>
-                <td class="hidden"><a href="https://example.com/track1.bai">track1.bai</a></td>
-            </tr>
-            <tr>
-                <td>Track 2</td>
-                <td><input type="checkbox" class="track-checkbox" data-track="https://example.com/track2.bam" data-index="https://example.com/track2.bai"></td>
-                <td class="hidden"><a href="https://example.com/track2.bam">track2.bam</a></td>
-                <td class="hidden"><a href="https://example.com/track2.bai">track2.bai</a></td>
-            </tr>
-            <tr>
-                <td>Track 3</td>
-                <td><input type="checkbox" class="track-checkbox" data-track="https://example.com/track3.bam" data-index="https://example.com/track3.bai"></td>
-                <td class="hidden"><a href="https://example.com/track3.bam">track3.bam</a></td>
-                <td class="hidden"><a href="https://example.com/track3.bai">track3.bai</a></td>
-            </tr>
-        </tbody>
-    </table>
+    <div id="tables-container"></div>
 
     <button onclick="generateLists()">Generate Lists</button>
+
+    <h2>Track Titles</h2>
+    <div id="titleList" class="scroll-box"></div>
 
     <h2>Track URLs</h2>
     <div id="trackList" class="scroll-box"></div>
@@ -73,21 +48,83 @@
     <div id="indexList" class="scroll-box"></div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('https://raw.githubusercontent.com/ink-blot/s3-genome-browser/main/track-data.json');
+            const data = await response.json();
+            const container = document.getElementById('tables-container');
+
+            data.forEach(genome => {
+                const table = document.createElement('table');
+
+                const caption = document.createElement('caption');
+                caption.textContent = genome.id;
+                table.appendChild(caption);
+
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr>
+                        <th>Display Name</th>
+                        <th>Select</th>
+                        <th class="hidden">Track URLs</th>
+                        <th class="hidden">Index URLs</th>
+                        <th class="hidden">Track Data</th>
+                    </tr>
+                `;
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+
+                genome.tracks.forEach(track => {
+                    const row = document.createElement('tr');
+
+                    const trackURL = track.url || '';
+                    const indexURL = track.indexURL || '';
+                    const trackData = JSON.stringify(track);
+
+                    row.innerHTML = `
+                        <td>${track.name}</td>
+                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}'></td>
+                        <td class="hidden">${trackURL}</td>
+                        <td class="hidden">${indexURL}</td>
+                        <td class="hidden">${trackData}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                table.appendChild(tbody);
+                container.appendChild(table);
+            });
+        });
+
         function generateLists() {
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
             const trackURLs = [];
             const indexURLs = [];
             const displayNames = [];
+            const remainingTrackURLs = [];
+            const remainingDisplayNames = [];
 
             checkboxes.forEach(checkbox => {
-                trackURLs.push(checkbox.getAttribute('data-track'));
-                indexURLs.push(checkbox.getAttribute('data-index'));
-                displayNames.push(checkbox.parentElement.previousElementSibling.textContent);
+                const trackURL = checkbox.getAttribute('data-track');
+                const indexURL = checkbox.getAttribute('data-index');
+                const displayName = checkbox.getAttribute('data-name');
+
+                if (indexURL) {
+                    trackURLs.push(trackURL);
+                    indexURLs.push(indexURL);
+                    displayNames.push(displayName);
+                } else {
+                    remainingTrackURLs.push(trackURL);
+                    remainingDisplayNames.push(displayName);
+                }
             });
 
-            document.getElementById('trackList').textContent = trackURLs.join(',');
+            const allTrackURLs = trackURLs.concat(remainingTrackURLs);
+            const allDisplayNames = displayNames.concat(remainingDisplayNames);
+
+            document.getElementById('titleList').textContent = allDisplayNames.join(',');
+            document.getElementById('trackList').textContent = allTrackURLs.join(',');
             document.getElementById('indexList').textContent = indexURLs.join(',');
-            console.log("Display Names: " + displayNames.join(','));
         }
     </script>
 </body>
