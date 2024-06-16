@@ -97,8 +97,10 @@
     <h1>Track Picker</h1>
 
     <h2>Load JSON Files</h2>
-    <label for="jsonFiles">Choose local JSON files:</label>
-    <input type="file" id="jsonFiles" name="jsonFiles" accept=".json" multiple>
+    <label for="jsonFiles" class="btn btn-secondary">
+        Choose local JSON files...
+        <input type="file" id="jsonFiles" name="jsonFiles" accept=".json" multiple style="display: none;">
+    </label>
     <br><br>
 
     <label for="urlInput">Enter comma-separated URLs:</label>
@@ -119,12 +121,10 @@
     <input type="text" id="filenameInput" value="session.json">
     <button class="btn btn-secondary" onclick="saveSessionFile()">Save Session File</button>
 
-    <h2>Blob URL</h2>
+    <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
     <div id="blobUrlOutput"></div>
 
-    <footer>
-        Track Picker
-    </footer>
+    <footer></footer>
 
     <script>
         let originalData = [];
@@ -420,6 +420,8 @@
             output.appendChild(link);
             output.appendChild(copyIcon);
             output.appendChild(notification);
+
+            document.getElementById('blobUrlHeader').style.display = 'block';
         }
 
         function saveSessionFile() {
@@ -434,3 +436,4 @@
     </script>
 </body>
 </html>
+
