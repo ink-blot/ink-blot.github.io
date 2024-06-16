@@ -211,7 +211,7 @@
 
                     row.innerHTML = `
                         <td>${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-genome-id="Session" data-fasta-url="${data.reference.fastaURL}" data-index-url="${data.reference.indexURL}" data-trackdata='${trackData}'></td>
+                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-fasta-url="${data.reference.fastaURL}" data-index-url="${data.reference.indexURL}" data-trackdata='${trackData}'></td>
                         <td class="hidden">${trackURL}</td>
                         <td class="hidden">${indexURL}</td>
                         <td class="hidden">${trackData}</td>
@@ -254,7 +254,7 @@
 
                 row.innerHTML = `
                     <td>${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-genome-id="${genome.id}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}'></td>
+                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}'></td>
                     <td class="hidden">${trackURL}</td>
                     <td class="hidden">${indexURL}</td>
                     <td class="hidden">${trackData}</td>
@@ -273,40 +273,38 @@
                 indexURL: checkbox.getAttribute('data-index'),
                 displayName: checkbox.getAttribute('data-name'),
                 fastaURL: checkbox.getAttribute('data-fasta-url'),
-                genomeIndexURL: checkbox.getAttribute('data-index-url'),
-                genomeID: checkbox.getAttribute('data-genome-id')
+                genomeIndexURL: checkbox.getAttribute('data-index-url')
             }));
 
-            const uniqueGenomeIDs = [...new Set(selectedTracks.map(track => track.genomeID))];
+            const uniqueFastaURLs = [...new Set(selectedTracks.map(track => track.fastaURL))];
 
             const sessionData = originalData
-                .filter(data => uniqueGenomeIDs.includes(data.id))
+                .filter(data => uniqueFastaURLs.includes(data.reference ? data.reference.fastaURL : data.fastaURL))
                 .map(genome => {
                     const tracks = genome.tracks.filter(track => selectedTracks.some(selectedTrack => selectedTrack.trackURL === track.url));
                     return { ...genome, tracks };
                 });
 
-            document.getElementById('genomeInfo').textContent = JSON.stringify(sessionData.map(genome => ({
-                ID: genome.id,
-                fastaURL: genome.fastaURL,
-                indexURL: genome.indexURL
-            })), null, 2);
+            const genomeInfo = sessionData.map(genome => ({
+                fastaURL: genome.reference ? genome.reference.fastaURL : genome.fastaURL,
+                indexURL: genome.reference ? genome.reference.indexURL : genome.indexURL
+            }));
+
+            document.getElementById('genomeInfo').textContent = genomeInfo.map(info => `Fasta URL: ${info.fastaURL}\nIndex URL: ${info.indexURL}`).join('\n\n');
 
             document.getElementById('titleList').textContent = selectedTracks.map(track => track.displayName).join(',');
             document.getElementById('trackList').textContent = selectedTracks.map(track => track.trackURL).join(',');
             document.getElementById('indexList').textContent = selectedTracks.map(track => track.indexURL).join(',');
 
+            const referenceData = sessionData[0].reference ? sessionData[0].reference : {
+                fastaURL: sessionData[0].fastaURL,
+                indexURL: sessionData[0].indexURL
+            };
+
             const sessionJson = JSON.stringify({
                 version: "2.15.11",
                 showSampleNames: false,
-                reference: {
-                    id: sessionData[0].id,
-                    name: sessionData[0].name,
-                    fastaURL: sessionData[0].fastaURL,
-                    indexURL: sessionData[0].indexURL,
-                    cytobandURL: sessionData[0].cytobandURL,
-                    aliasURL: sessionData[0].aliasURL
-                },
+                reference: referenceData,
                 locus: "all",
                 roi: [],
                 tracks: sessionData.flatMap(genome => genome.tracks)
