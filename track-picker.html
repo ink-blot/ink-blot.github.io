@@ -45,6 +45,13 @@
             box-sizing: border-box;
             margin-bottom: 20px;
         }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border-top: 1px solid #ddd;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 </head>
@@ -83,6 +90,13 @@
     <label for="filenameInput">Filename:</label>
     <input type="text" id="filenameInput" value="session.json">
     <button onclick="saveSessionFile()">Save Session File</button>
+
+    <h2>Blob URL</h2>
+    <div id="blobUrlOutput" class="output-box"></div>
+
+    <footer>
+        &copy; 2024 Track Reorganizer
+    </footer>
 
     <script>
         let originalData = [];
@@ -280,6 +294,17 @@
             document.getElementById('tables-container').appendChild(table);
         }
 
+        function compressString(str) {
+            const bytes = new Uint8Array(str.length);
+            for (let i = 0; i < str.length; i++) {
+                bytes[i] = str.charCodeAt(i);
+            }
+            const compressedBytes = pako.deflateRaw(bytes);
+            const compressedString = String.fromCharCode.apply(null, compressedBytes);
+            let enc = btoa(compressedString);
+            return enc.replace(/\+/g, '.').replace(/\//g, '_').replace(/=/g, '-');
+        }
+
         function generateSessionJson() {
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
             const selectedTracks = Array.from(checkboxes).map(checkbox => JSON.parse(checkbox.getAttribute('data-trackdata')));
@@ -304,9 +329,6 @@
                 trackGroups[trackURL].push(JSON.parse(checkbox.getAttribute('data-trackdata')));
             });
 
-            // Debug: Display the fasta URLs being compared
-            alert(`Fasta URLs being compared:\n\n${[...uniqueFastaURLs].join('\n\n')}`);
-
             if (uniqueFastaURLs.size > 1) {
                 alert('Tracks from different references cannot be combined.');
                 return;
@@ -325,6 +347,18 @@
             };
 
             document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
+
+            // Generate blob URL from session JSON
+            const compressedString = compressString(JSON.stringify(sessionJson));
+            const blobUrl = `https://igv.org/app/?sessionURL=blob:${compressedString}`;
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.textContent = 'Blob URL';
+            link.target = '_blank';
+            const output = document.getElementById('blobUrlOutput');
+            output.innerHTML = '';
+            output.appendChild(link);
         }
 
         function saveSessionFile() {
@@ -339,3 +373,4 @@
     </script>
 </body>
 </html>
+
