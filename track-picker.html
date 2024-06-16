@@ -60,6 +60,10 @@
     <input type="text" id="urlInput" placeholder="Enter URLs here">
     <br><br>
 
+    <label for="blobUrlInput">Or enter comma-separated Blob URLs:</label>
+    <input type="text" id="blobUrlInput" placeholder="Enter Blob URLs here">
+    <br><br>
+
     <button onclick="loadFiles()">Load Files</button>
 
     <div id="tables-container"></div>
@@ -78,15 +82,15 @@
     <h2>Index URLs</h2>
     <div id="indexList" class="scroll-box"></div>
 
+    <h2>Decompressed Blob Data</h2>
+    <div id="decompressedOutput" class="scroll-box"></div>
+
     <script>
         let currentFastaURL = null;
         let currentIndexURL = null;
 
         async function loadJSON(url) {
             const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
-            }
             return await response.json();
         }
 
@@ -106,6 +110,7 @@
             const fileList = document.getElementById('jsonFiles').files;
             const selectedURLs = Array.from(document.getElementById('urlPicker').selectedOptions).map(option => option.value);
             const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
+            const enteredBlobURLs = document.getElementById('blobUrlInput').value.split(',').map(url => url.trim()).filter(url => url);
 
             const allPromises = [];
 
@@ -118,30 +123,25 @@
             }
 
             for (const url of enteredURLs) {
-                if (url.startsWith('https://igv.org/app/?sessionURL=blob:')) {
-                    allPromises.push(loadBlobURL(url));
+                allPromises.push(loadJSON(url));
+            }
+
+            for (const blobUrl of enteredBlobURLs) {
+                allPromises.push(loadBlobURL(blobUrl));
+            }
+
+            const allData = await Promise.all(allPromises);
+            const combinedData = allData.flat();
+
+            combinedData.forEach(data => {
+                if (data.reference && data.tracks) {
+                    // Session JSON format
+                    processSessionJSON(data);
                 } else {
-                    allPromises.push(loadJSON(url));
+                    // Original JSON format
+                    processGenomeJSON(data);
                 }
-            }
-
-            try {
-                const allData = await Promise.all(allPromises);
-                const combinedData = allData.flat();
-
-                combinedData.forEach(data => {
-                    if (data.reference && data.tracks) {
-                        // Session JSON format
-                        processSessionJSON(data);
-                    } else {
-                        // Original JSON format
-                        processGenomeJSON(data);
-                    }
-                });
-            } catch (error) {
-                console.error(error);
-                alert('Error loading files. Please check the console for more details.');
-            }
+            });
         }
 
         function uncompressString(enc) {
@@ -162,6 +162,7 @@
         async function loadBlobURL(url) {
             const blobUrl = new URL(url).searchParams.get('sessionURL').replace('blob:', '');
             const decompressedData = uncompressString(blobUrl);
+            document.getElementById('decompressedOutput').textContent += decompressedData + '\n\n';
             return JSON.parse(decompressedData);
         }
 
