@@ -187,7 +187,9 @@
                     throw new Error('Invalid blob URL: sessionURL parameter is missing');
                 }
                 const blobUrl = blobUrlParam.replace('blob:', '');
+                console.log(`Blob URL: ${blobUrl}`);
                 const decompressedData = uncompressString(blobUrl);
+                console.log(`Decompressed Data: ${decompressedData}`);
                 document.getElementById('decompressedOutput').textContent += decompressedData + '\n\n';
                 return JSON.parse(decompressedData);
             } catch (error) {
@@ -388,3 +390,4 @@
     </script>
 </body>
 </html>
+
