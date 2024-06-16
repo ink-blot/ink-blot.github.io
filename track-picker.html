@@ -120,28 +120,40 @@
             const allData = await Promise.all(allPromises);
             const combinedData = allData.flat();
 
-            combinedData.forEach(genome => {
-                const table = document.createElement('table');
+            combinedData.forEach(data => {
+                if (data.reference && data.tracks) {
+                    // Session JSON format
+                    processSessionJSON(data);
+                } else {
+                    // Original JSON format
+                    processGenomeJSON(data);
+                }
+            });
+        }
 
-                const caption = document.createElement('caption');
-                caption.textContent = genome.id;
-                table.appendChild(caption);
+        function processSessionJSON(data) {
+            const table = document.createElement('table');
 
-                const thead = document.createElement('thead');
-                thead.innerHTML = `
-                    <tr>
-                        <th>Display Name</th>
-                        <th>Select</th>
-                        <th class="hidden">Track URLs</th>
-                        <th class="hidden">Index URLs</th>
-                        <th class="hidden">Track Data</th>
-                    </tr>
-                `;
-                table.appendChild(thead);
+            const caption = document.createElement('caption');
+            caption.textContent = 'Session Data';
+            table.appendChild(caption);
 
-                const tbody = document.createElement('tbody');
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th>Display Name</th>
+                    <th>Select</th>
+                    <th class="hidden">Track URLs</th>
+                    <th class="hidden">Index URLs</th>
+                    <th class="hidden">Track Data</th>
+                </tr>
+            `;
+            table.appendChild(thead);
 
-                genome.tracks.forEach(track => {
+            const tbody = document.createElement('tbody');
+
+            data.tracks.forEach(track => {
+                if (track.url) {
                     const row = document.createElement('tr');
 
                     const trackURL = track.url || '';
@@ -149,18 +161,60 @@
                     const trackData = JSON.stringify(track);
 
                     row.innerHTML = `
-                        <td>${track.name}</td>
-                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-genome-id="${genome.id}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}'></td>
+                        <td>${track.name || track.filename}</td>
+                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-genome-id="Session" data-fasta-url="${data.reference.fastaURL}" data-index-url="${data.reference.indexURL}" data-trackdata='${trackData}'></td>
                         <td class="hidden">${trackURL}</td>
                         <td class="hidden">${indexURL}</td>
                         <td class="hidden">${trackData}</td>
                     `;
                     tbody.appendChild(row);
-                });
-
-                table.appendChild(tbody);
-                tablesContainer.appendChild(table);
+                }
             });
+
+            table.appendChild(tbody);
+            document.getElementById('tables-container').appendChild(table);
+        }
+
+        function processGenomeJSON(genome) {
+            const table = document.createElement('table');
+
+            const caption = document.createElement('caption');
+            caption.textContent = genome.id;
+            table.appendChild(caption);
+
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th>Display Name</th>
+                    <th>Select</th>
+                    <th class="hidden">Track URLs</th>
+                    <th class="hidden">Index URLs</th>
+                    <th class="hidden">Track Data</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+
+            genome.tracks.forEach(track => {
+                const row = document.createElement('tr');
+
+                const trackURL = track.url || '';
+                const indexURL = track.indexURL || '';
+                const trackData = JSON.stringify(track);
+
+                row.innerHTML = `
+                    <td>${track.name}</td>
+                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-genome-id="${genome.id}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}'></td>
+                    <td class="hidden">${trackURL}</td>
+                    <td class="hidden">${indexURL}</td>
+                    <td class="hidden">${trackData}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            table.appendChild(tbody);
+            document.getElementById('tables-container').appendChild(table);
         }
 
         function generateLists() {
