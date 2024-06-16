@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track PIcker</title>
+    <title>Track Picker</title>
     <style>
         table {
             width: 100%;
@@ -52,30 +52,31 @@
             background-color: #f2f2f2;
             border-top: 1px solid #ddd;
         }
+        .copy-icon {
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 14px;
+            color: #007bff;
+        }
+        .copy-notification {
+            display: none;
+            color: green;
+            font-size: 12px;
+            margin-left: 10px;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 </head>
 <body>
-    <h1>Track and Index Lists</h1>
+    <h1>Track Picker</h1>
 
     <h2>Load JSON Files</h2>
     <label for="jsonFiles">Choose local JSON files:</label>
     <input type="file" id="jsonFiles" name="jsonFiles" accept=".json" multiple>
     <br><br>
 
-    <label for="urlPicker">Or select from predefined URLs:</label>
-    <select id="urlPicker" multiple>
-        <option value="https://raw.githubusercontent.com/ink-blot/s3-genome-browser/main/track-data.json">track-data.json</option>
-        <option value="https://raw.githubusercontent.com/ink-blot/s3-genome-browser/main/track-data-1.json">track-data-1.json</option>
-    </select>
-    <br><br>
-
-    <label for="urlInput">Or enter comma-separated URLs:</label>
+    <label for="urlInput">Enter comma-separated URLs:</label>
     <input type="text" id="urlInput" placeholder="Enter URLs here">
-    <br><br>
-
-    <label for="blobUrlInput">Or enter comma-separated Blob URLs:</label>
-    <input type="text" id="blobUrlInput" placeholder="Enter Blob URLs here">
     <br><br>
 
     <button onclick="loadFiles()">Load Files</button>
@@ -92,7 +93,7 @@
     <button onclick="saveSessionFile()">Save Session File</button>
 
     <h2>Blob URL</h2>
-    <div id="blobUrlOutput" class="output-box"></div>
+    <div id="blobUrlOutput"></div>
 
     <footer>
         Track Picker
@@ -129,9 +130,7 @@
             originalData = [];
 
             const fileList = document.getElementById('jsonFiles').files;
-            const selectedURLs = Array.from(document.getElementById('urlPicker').selectedOptions).map(option => option.value);
             const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
-            const enteredBlobURLs = document.getElementById('blobUrlInput').value.split(',').map(url => url.trim()).filter(url => url);
 
             const allPromises = [];
 
@@ -139,18 +138,14 @@
                 allPromises.push(readFile(file));
             }
 
-            for (const url of selectedURLs) {
-                allPromises.push(loadJSON(url));
-            }
-
             for (const url of enteredURLs) {
-                // Convert regular GitHub URLs to raw content URLs
-                const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
-                allPromises.push(loadJSON(rawUrl));
-            }
-
-            for (const blobUrl of enteredBlobURLs) {
-                allPromises.push(loadBlobURL(blobUrl));
+                if (url.includes('sessionURL=blob:')) {
+                    allPromises.push(loadBlobURL(url));
+                } else {
+                    // Convert regular GitHub URLs to raw content URLs
+                    const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+                    allPromises.push(loadJSON(rawUrl));
+                }
             }
 
             const allData = await Promise.all(allPromises);
@@ -370,9 +365,30 @@
             link.href = blobUrl;
             link.textContent = 'Blob URL';
             link.target = '_blank';
+
+            const copyIcon = document.createElement('span');
+            copyIcon.className = 'copy-icon';
+            copyIcon.textContent = '📋';
+            copyIcon.onclick = () => {
+                navigator.clipboard.writeText(blobUrl).then(() => {
+                    const notification = document.getElementById('copyNotification');
+                    notification.style.display = 'inline';
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                    }, 2000);
+                });
+            };
+
+            const notification = document.createElement('span');
+            notification.id = 'copyNotification';
+            notification.className = 'copy-notification';
+            notification.textContent = 'Link copied!';
+
             const output = document.getElementById('blobUrlOutput');
             output.innerHTML = '';
             output.appendChild(link);
+            output.appendChild(copyIcon);
+            output.appendChild(notification);
         }
 
         function saveSessionFile() {
