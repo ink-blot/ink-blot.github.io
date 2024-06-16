@@ -305,6 +305,9 @@
                 trackGroups[trackURL].push(JSON.parse(checkbox.getAttribute('data-trackdata')));
             });
 
+            // Debug: Display the references being compared
+            alert(`References being compared:\n\n${[...uniqueReferences].join('\n\n')}`);
+
             if (uniqueReferences.size > 1) {
                 alert('Tracks from different references cannot be combined.');
                 return;
