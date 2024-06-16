@@ -93,6 +93,10 @@
         .btn {
             margin-bottom: 10px;
         }
+        .file-list {
+            font-size: 14px;
+            margin-top: 10px;
+        }
     </style>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
@@ -103,8 +107,9 @@
     <h2>Load JSON Files</h2>
     <label for="jsonFiles" class="btn btn-secondary">
         Choose local JSON files...
-        <input type="file" id="jsonFiles" name="jsonFiles" accept=".json" multiple style="display: none;">
+        <input type="file" id="jsonFiles" name="jsonFiles" accept=".json" multiple style="display: none;" onchange="displaySelectedFiles()">
     </label>
+    <div id="fileList" class="file-list"></div>
     <br><br>
 
     <label for="urlInput">Enter comma-separated URLs:</label>
@@ -116,7 +121,7 @@
     <h2 id="trackDataHeader" style="display:none;">Track Data</h2>
     <div id="tables-container"></div>
 
-    <button class="btn btn-primary" onclick="generateSessionJson()">Generate Session JSON</button>
+    <button class="btn btn-primary" id="generateSessionButton" style="display: none;" onclick="generateSessionJson()">Generate Session JSON</button>
 
     <div id="sessionJsonSection" style="display: none;">
         <h2>Session JSON Output</h2>
@@ -194,6 +199,7 @@
 
             if (originalData.length > 0) {
                 document.getElementById('trackDataHeader').style.display = 'block';
+                document.getElementById('generateSessionButton').style.display = 'inline-block';
             }
         }
 
@@ -334,6 +340,18 @@
 
             table.appendChild(tbody);
             document.getElementById('tables-container').appendChild(table);
+        }
+
+        function displaySelectedFiles() {
+            const fileList = document.getElementById('jsonFiles').files;
+            const fileListDiv = document.getElementById('fileList');
+            fileListDiv.innerHTML = '';
+
+            for (const file of fileList) {
+                const fileItem = document.createElement('div');
+                fileItem.textContent = file.name;
+                fileListDiv.appendChild(fileItem);
+            }
         }
 
         function compressString(str) {
