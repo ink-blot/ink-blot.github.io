@@ -187,9 +187,7 @@
                     throw new Error('Invalid blob URL: sessionURL parameter is missing');
                 }
                 const blobUrl = blobUrlParam.replace('blob:', '');
-                console.log(`Blob URL: ${blobUrl}`);
                 const decompressedData = uncompressString(blobUrl);
-                console.log(`Decompressed Data: ${decompressedData}`);
                 return JSON.parse(decompressedData);
             } catch (error) {
                 console.error(`Failed to process blob URL ${url}:`, error);
