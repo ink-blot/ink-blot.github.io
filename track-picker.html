@@ -206,7 +206,7 @@
 
                     row.innerHTML = `
                         <td>${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-fasta-url="${data.reference.fastaURL}" data-index-url="${data.reference.indexURL}" data-trackdata='${trackData}'></td>
+                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-fasta-url="${data.reference.fastaURL}" data-index-url="${data.reference.indexURL}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
                         <td>${trackURL}</td>
                         <td>${indexURL}</td>
                         <td>${trackData}</td>
@@ -268,7 +268,7 @@
 
                 row.innerHTML = `
                     <td>${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}'></td>
+                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
                     <td>${trackURL}</td>
                     <td>${indexURL}</td>
                     <td>${trackData}</td>
@@ -294,7 +294,7 @@
 
             checkboxes.forEach(checkbox => {
                 const trackURL = checkbox.getAttribute('data-track');
-                const referenceData = JSON.parse(checkbox.closest('table').querySelector('tbody tr td:nth-child(5)').textContent);
+                const referenceData = JSON.parse(checkbox.getAttribute('data-refdata'));
 
                 if (!uniqueReferences.some(ref => JSON.stringify(ref) === JSON.stringify(referenceData))) {
                     uniqueReferences.push(referenceData);
