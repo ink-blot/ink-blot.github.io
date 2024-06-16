@@ -39,6 +39,7 @@
             white-space: pre-line;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 </head>
 <body>
     <h1>Track and Index Lists</h1>
@@ -114,7 +115,11 @@
             }
 
             for (const url of enteredURLs) {
-                allPromises.push(loadJSON(url));
+                if (url.startsWith('https://igv.org/app/?sessionURL=blob:')) {
+                    allPromises.push(loadBlobURL(url));
+                } else {
+                    allPromises.push(loadJSON(url));
+                }
             }
 
             const allData = await Promise.all(allPromises);
@@ -131,6 +136,27 @@
             });
         }
 
+        function uncompressString(enc) {
+            enc = enc.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=');
+            const compressedString = atob(enc);
+            const compressedBytes = [];
+            for (let i = 0; i < compressedString.length; i++) {
+                compressedBytes.push(compressedString.charCodeAt(i));
+            }
+            const bytes = pako.inflateRaw(new Uint8Array(compressedBytes));
+            let str = '';
+            for (let b of bytes) {
+                str += String.fromCharCode(b);
+            }
+            return str;
+        }
+
+        async function loadBlobURL(url) {
+            const blobUrl = new URL(url).searchParams.get('sessionURL').replace('blob:', '');
+            const decompressedData = uncompressString(blobUrl);
+            return JSON.parse(decompressedData);
+        }
+
         function processSessionJSON(data) {
             const table = document.createElement('table');
 
@@ -141,7 +167,7 @@
             const thead = document.createElement('thead');
             thead.innerHTML = `
                 <tr>
-                    <th>Display Name</th>
+                    <th>Track Name</th>
                     <th>Select</th>
                     <th class="hidden">Track URLs</th>
                     <th class="hidden">Index URLs</th>
@@ -185,7 +211,7 @@
             const thead = document.createElement('thead');
             thead.innerHTML = `
                 <tr>
-                    <th>Display Name</th>
+                    <th>Track Name</th>
                     <th>Select</th>
                     <th class="hidden">Track URLs</th>
                     <th class="hidden">Index URLs</th>
