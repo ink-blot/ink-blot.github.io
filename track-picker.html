@@ -346,6 +346,10 @@
             }
 
             const selectedReference = Array.from(document.querySelectorAll('tr')).find(row => row.cells[2] && row.cells[2].textContent === [...uniqueFastaURLs][0]);
+            if (!selectedReference) {
+                alert('Reference not found for the selected tracks.');
+                return;
+            }
             const referenceData = JSON.parse(selectedReference.cells[4].textContent);
 
             const sessionJson = {
