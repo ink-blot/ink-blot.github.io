@@ -300,8 +300,12 @@
                 version: "2.15.11",
                 showSampleNames: false,
                 reference: {
-                    fastaURL: selectedTracks[0]?.fastaURL || "",
-                    indexURL: selectedTracks[0]?.genomeIndexURL || ""
+                    id: sessionData[0].id,
+                    name: sessionData[0].name,
+                    fastaURL: sessionData[0].fastaURL,
+                    indexURL: sessionData[0].indexURL,
+                    cytobandURL: sessionData[0].cytobandURL,
+                    aliasURL: sessionData[0].aliasURL
                 },
                 locus: "all",
                 roi: [],
