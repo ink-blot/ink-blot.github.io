@@ -38,6 +38,16 @@
             margin-bottom: 20px;
             white-space: pre-line;
         }
+        .output-box {
+            width: 100%;
+            height: 150px;
+            overflow: auto;
+            white-space: pre-wrap;
+            border: 1px solid #ddd;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 </head>
@@ -82,8 +92,12 @@
     <h2>Index URLs</h2>
     <div id="indexList" class="scroll-box"></div>
 
-    <h2>Decompressed Blob Data</h2>
-    <div id="decompressedOutput" class="scroll-box"></div>
+    <h2>Session JSON Output</h2>
+    <textarea id="sessionJsonOutput" class="output-box" readonly></textarea>
+    <br>
+    <label for="filenameInput">Filename:</label>
+    <input type="text" id="filenameInput" value="session.json">
+    <button onclick="saveSessionFile()">Save Session File</button>
 
     <script>
         let currentFastaURL = null;
@@ -262,6 +276,7 @@
 
             let genomeInfoSet = false;
             let genomeInfo = '';
+            let genomeID = '';
 
             checkboxes.forEach(checkbox => {
                 const trackURL = checkbox.getAttribute('data-track');
@@ -269,11 +284,12 @@
                 const displayName = checkbox.getAttribute('data-name');
                 const fastaURL = checkbox.getAttribute('data-fasta-url');
                 const genomeIndexURL = checkbox.getAttribute('data-index-url');
-                const genomeID = checkbox.getAttribute('data-genome-id');
+                const genomeIDValue = checkbox.getAttribute('data-genome-id');
 
                 if (!genomeInfoSet) {
                     currentFastaURL = fastaURL;
                     currentIndexURL = genomeIndexURL;
+                    genomeID = genomeIDValue;
                     genomeInfo = `ID: ${genomeID}\nFasta URL: ${currentFastaURL}\nIndex URL: ${currentIndexURL}`;
                     genomeInfoSet = true;
                 }
@@ -300,6 +316,37 @@
             document.getElementById('titleList').textContent = allDisplayNames.join(',');
             document.getElementById('trackList').textContent = allTrackURLs.join(',');
             document.getElementById('indexList').textContent = indexURLs.join(',');
+
+            const sessionData = {
+                version: "2.15.11",
+                showSampleNames: false,
+                reference: {
+                    fastaURL: currentFastaURL,
+                    indexURL: currentIndexURL
+                },
+                locus: "",
+                roi: [],
+                tracks: trackURLs.map((url, index) => ({
+                    url,
+                    indexURL: indexURLs[index] || "",
+                    name: displayNames[index],
+                    format: "unknown",
+                    type: "unknown"
+                }))
+            };
+
+            const sessionJson = JSON.stringify(sessionData, null, 2);
+            document.getElementById('sessionJsonOutput').textContent = sessionJson;
+        }
+
+        function saveSessionFile() {
+            const sessionJson = document.getElementById('sessionJsonOutput').textContent;
+            const blob = new Blob([sessionJson], { type: "application/json" });
+            const filename = document.getElementById('filenameInput').value;
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
         }
     </script>
 </body>
