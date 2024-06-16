@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Reorganizer</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .draggable {
+            cursor: move;
+        }
+    </style>
+</head>
+<body>
+    <h1>Track and Index Lists</h1>
+    <table id="trackTable">
+        <thead>
+            <tr>
+                <th>Track URLs</th>
+                <th>Index URLs</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="draggable">
+                <td><a href="https://example.com/track1.bam">track1.bam</a></td>
+                <td><a href="https://example.com/track1.bai">track1.bai</a></td>
+            </tr>
+            <tr class="draggable">
+                <td><a href="https://example.com/track2.bam">track2.bam</a></td>
+                <td><a href="https://example.com/track2.bai">track2.bai</a></td>
+            </tr>
+            <tr class="draggable">
+                <td><a href="https://example.com/track3.bam">track3.bam</a></td>
+                <td><a href="https://example.com/track3.bai">track3.bai</a></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const table = document.getElementById('trackTable');
+            let draggingElement = null;
+
+            table.addEventListener('dragstart', (e) => {
+                draggingElement = e.target.closest('tr');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            table.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const target = e.target.closest('tr');
+                if (target && target !== draggingElement) {
+                    const rect = target.getBoundingClientRect();
+                    const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                    table.tBodies[0].insertBefore(draggingElement, next && target.nextSibling || target);
+                }
+            });
+
+            table.addEventListener('dragend', () => {
+                draggingElement = null;
+            });
+        });
+    </script>
+</body>
+</html>
