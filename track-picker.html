@@ -73,9 +73,6 @@
 
     <button onclick="loadFiles()">Load Files</button>
 
-    <h2>Genome Information</h2>
-    <textarea id="genomeInfo" class="output-box" readonly></textarea>
-
     <div id="tables-container"></div>
 
     <button onclick="generateLists()">Generate Lists</button>
@@ -117,7 +114,6 @@
             const tablesContainer = document.getElementById('tables-container');
             tablesContainer.innerHTML = '';
             originalData = [];
-            let genomeInfoText = '';
 
             const fileList = document.getElementById('jsonFiles').files;
             const selectedURLs = Array.from(document.getElementById('urlPicker').selectedOptions).map(option => option.value);
@@ -147,19 +143,11 @@
 
             originalData.forEach(data => {
                 if (data.reference && data.tracks) {
-                    // Session JSON format
-                    genomeInfoText += JSON.stringify(data.reference, null, 2) + '\n\n';
                     processSessionJSON(data);
                 } else {
-                    // Original JSON format
-                    const genomeInfo = { ...data };
-                    delete genomeInfo.tracks;
-                    genomeInfoText += JSON.stringify(genomeInfo, null, 2) + '\n\n';
                     processGenomeJSON(data);
                 }
             });
-
-            document.getElementById('genomeInfo').textContent = genomeInfoText.trim();
         }
 
         function uncompressString(enc) {
@@ -205,6 +193,18 @@
 
             const tbody = document.createElement('tbody');
 
+            // Add reference row
+            const referenceData = JSON.stringify(data.reference);
+            const refRow = document.createElement('tr');
+            refRow.innerHTML = `
+                <td>Reference</td>
+                <td></td>
+                <td>${data.reference.fastaURL}</td>
+                <td>${data.reference.indexURL}</td>
+                <td>${referenceData}</td>
+            `;
+            tbody.appendChild(refRow);
+
             data.tracks.forEach(track => {
                 if (track.url) {
                     const row = document.createElement('tr');
@@ -248,6 +248,25 @@
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
+
+            // Add reference row
+            const referenceData = JSON.stringify({
+                id: genome.id,
+                name: genome.name,
+                fastaURL: genome.fastaURL,
+                indexURL: genome.indexURL,
+                cytobandURL: genome.cytobandURL,
+                aliasURL: genome.aliasURL
+            });
+            const refRow = document.createElement('tr');
+            refRow.innerHTML = `
+                <td>Reference</td>
+                <td></td>
+                <td>${genome.fastaURL}</td>
+                <td>${genome.indexURL}</td>
+                <td>${referenceData}</td>
+            `;
+            tbody.appendChild(refRow);
 
             genome.tracks.forEach(track => {
                 const row = document.createElement('tr');
