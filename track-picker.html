@@ -181,10 +181,19 @@
         }
 
         async function loadBlobURL(url) {
-            const blobUrl = new URL(url).searchParams.get('sessionURL').replace('blob:', '');
-            const decompressedData = uncompressString(blobUrl);
-            document.getElementById('decompressedOutput').textContent += decompressedData + '\n\n';
-            return JSON.parse(decompressedData);
+            try {
+                const blobUrlParam = new URL(url).searchParams.get('sessionURL');
+                if (!blobUrlParam) {
+                    throw new Error('Invalid blob URL: sessionURL parameter is missing');
+                }
+                const blobUrl = blobUrlParam.replace('blob:', '');
+                const decompressedData = uncompressString(blobUrl);
+                document.getElementById('decompressedOutput').textContent += decompressedData + '\n\n';
+                return JSON.parse(decompressedData);
+            } catch (error) {
+                console.error(`Failed to process blob URL ${url}:`, error);
+                alert(`Failed to process blob URL ${url}: ${error.message}`);
+            }
         }
 
         function processSessionJSON(data) {
