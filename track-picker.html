@@ -28,6 +28,7 @@
             padding: 8px;
             text-align: left;
             border: 1px solid #ddd;
+            box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
         }
         th {
             background-color: #f2f2f2;
@@ -40,6 +41,7 @@
             border: 1px solid #ddd;
             padding: 8px;
             box-sizing: border-box;
+            box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
         }
         .info-box {
             width: 100%;
@@ -48,6 +50,7 @@
             box-sizing: border-box;
             margin-bottom: 20px;
             white-space: pre-line;
+            box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
         }
         .output-box {
             width: 100%;
@@ -58,6 +61,7 @@
             padding: 8px;
             box-sizing: border-box;
             margin-bottom: 20px;
+            box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
         }
         footer {
             margin-top: 20px;
@@ -104,7 +108,7 @@
     <br><br>
 
     <label for="urlInput">Enter comma-separated URLs:</label>
-    <input type="text" id="urlInput" placeholder="Enter URLs here">
+    <input type="text" id="urlInput" class="form-control" placeholder="Enter URLs here">
     <br><br>
 
     <button class="btn btn-primary" onclick="loadFiles()">Load Files</button>
@@ -114,15 +118,17 @@
 
     <button class="btn btn-primary" onclick="generateSessionJson()">Generate Session JSON</button>
 
-    <h2>Session JSON Output</h2>
-    <textarea id="sessionJsonOutput" class="output-box" readonly></textarea>
-    <br>
-    <label for="filenameInput">Filename:</label>
-    <input type="text" id="filenameInput" value="session.json">
-    <button class="btn btn-secondary" onclick="saveSessionFile()">Save Session File</button>
+    <div id="sessionJsonSection" style="display: none;">
+        <h2>Session JSON Output</h2>
+        <textarea id="sessionJsonOutput" class="output-box" readonly></textarea>
+        <br>
+        <label for="filenameInput">Filename:</label>
+        <input type="text" id="filenameInput" class="form-control" value="session.json">
+        <button class="btn btn-secondary" onclick="saveSessionFile()">Save Session File</button>
 
-    <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
-    <div id="blobUrlOutput"></div>
+        <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
+        <div id="blobUrlOutput"></div>
+    </div>
 
     <footer></footer>
 
@@ -387,6 +393,7 @@
             };
 
             document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
+            document.getElementById('sessionJsonSection').style.display = 'block';
 
             // Generate blob URL from session JSON
             const compressedString = compressString(JSON.stringify(sessionJson));
