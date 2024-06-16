@@ -180,10 +180,6 @@
         function processSessionJSON(data) {
             const table = document.createElement('table');
 
-            const caption = document.createElement('caption');
-            caption.textContent = 'Session Data';
-            table.appendChild(caption);
-
             const thead = document.createElement('thead');
             thead.innerHTML = `
                 <tr>
@@ -235,10 +231,6 @@
 
         function processGenomeJSON(genome) {
             const table = document.createElement('table');
-
-            const caption = document.createElement('caption');
-            caption.textContent = genome.id;
-            table.appendChild(caption);
 
             const thead = document.createElement('thead');
             thead.innerHTML = `
@@ -350,7 +342,7 @@
 
             // Generate blob URL from session JSON
             const compressedString = compressString(JSON.stringify(sessionJson));
-            const blobUrl = `https://igv.org/app/?sessionURL=blob:${compressedString}`;
+            const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
             const link = document.createElement('a');
             link.href = blobUrl;
