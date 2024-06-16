@@ -100,8 +100,7 @@
     <button onclick="saveSessionFile()">Save Session File</button>
 
     <script>
-        let currentFastaURL = null;
-        let currentIndexURL = null;
+        let originalData = [];
 
         async function loadJSON(url) {
             const response = await fetch(url);
@@ -120,6 +119,7 @@
         async function loadFiles() {
             const tablesContainer = document.getElementById('tables-container');
             tablesContainer.innerHTML = '';
+            originalData = [];
 
             const fileList = document.getElementById('jsonFiles').files;
             const selectedURLs = Array.from(document.getElementById('urlPicker').selectedOptions).map(option => option.value);
@@ -145,9 +145,9 @@
             }
 
             const allData = await Promise.all(allPromises);
-            const combinedData = allData.flat();
+            originalData = allData.flat();
 
-            combinedData.forEach(data => {
+            originalData.forEach(data => {
                 if (data.reference && data.tracks) {
                     // Session JSON format
                     processSessionJSON(data);
@@ -268,74 +268,46 @@
 
         function generateLists() {
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
-            const trackURLs = [];
-            const indexURLs = [];
-            const displayNames = [];
-            const remainingTrackURLs = [];
-            const remainingDisplayNames = [];
+            const selectedTracks = Array.from(checkboxes).map(checkbox => ({
+                trackURL: checkbox.getAttribute('data-track'),
+                indexURL: checkbox.getAttribute('data-index'),
+                displayName: checkbox.getAttribute('data-name'),
+                fastaURL: checkbox.getAttribute('data-fasta-url'),
+                genomeIndexURL: checkbox.getAttribute('data-index-url'),
+                genomeID: checkbox.getAttribute('data-genome-id')
+            }));
 
-            let genomeInfoSet = false;
-            let genomeInfo = '';
-            let genomeID = '';
+            const uniqueGenomeIDs = [...new Set(selectedTracks.map(track => track.genomeID))];
 
-            checkboxes.forEach(checkbox => {
-                const trackURL = checkbox.getAttribute('data-track');
-                const indexURL = checkbox.getAttribute('data-index');
-                const displayName = checkbox.getAttribute('data-name');
-                const fastaURL = checkbox.getAttribute('data-fasta-url');
-                const genomeIndexURL = checkbox.getAttribute('data-index-url');
-                const genomeIDValue = checkbox.getAttribute('data-genome-id');
+            const sessionData = originalData
+                .filter(data => uniqueGenomeIDs.includes(data.id))
+                .map(genome => {
+                    const tracks = genome.tracks.filter(track => selectedTracks.some(selectedTrack => selectedTrack.trackURL === track.url));
+                    return { ...genome, tracks };
+                });
 
-                if (!genomeInfoSet) {
-                    currentFastaURL = fastaURL;
-                    currentIndexURL = genomeIndexURL;
-                    genomeID = genomeIDValue;
-                    genomeInfo = `ID: ${genomeID}\nFasta URL: ${currentFastaURL}\nIndex URL: ${currentIndexURL}`;
-                    genomeInfoSet = true;
-                }
+            document.getElementById('genomeInfo').textContent = JSON.stringify(sessionData.map(genome => ({
+                ID: genome.id,
+                fastaURL: genome.fastaURL,
+                indexURL: genome.indexURL
+            })), null, 2);
 
-                if (fastaURL === currentFastaURL && genomeIndexURL === currentIndexURL) {
-                    if (indexURL) {
-                        trackURLs.push(trackURL);
-                        indexURLs.push(indexURL);
-                        displayNames.push(displayName);
-                    } else {
-                        remainingTrackURLs.push(trackURL);
-                        remainingDisplayNames.push(displayName);
-                    }
-                } else {
-                    alert(`Track URLs and Index URLs cannot be selected from different genome elements with different fastaURL and indexURL values.`);
-                    checkbox.checked = false;
-                }
-            });
+            document.getElementById('titleList').textContent = selectedTracks.map(track => track.displayName).join(',');
+            document.getElementById('trackList').textContent = selectedTracks.map(track => track.trackURL).join(',');
+            document.getElementById('indexList').textContent = selectedTracks.map(track => track.indexURL).join(',');
 
-            const allTrackURLs = trackURLs.concat(remainingTrackURLs);
-            const allDisplayNames = displayNames.concat(remainingDisplayNames);
-
-            document.getElementById('genomeInfo').textContent = genomeInfo;
-            document.getElementById('titleList').textContent = allDisplayNames.join(',');
-            document.getElementById('trackList').textContent = allTrackURLs.join(',');
-            document.getElementById('indexList').textContent = indexURLs.join(',');
-
-            const sessionData = {
+            const sessionJson = JSON.stringify({
                 version: "2.15.11",
                 showSampleNames: false,
                 reference: {
-                    fastaURL: currentFastaURL,
-                    indexURL: currentIndexURL
+                    fastaURL: selectedTracks[0]?.fastaURL || "",
+                    indexURL: selectedTracks[0]?.genomeIndexURL || ""
                 },
                 locus: "all",
                 roi: [],
-                tracks: trackURLs.map((url, index) => ({
-                    url,
-                    indexURL: indexURLs[index] || "",
-                    name: displayNames[index],
-                    format: "unknown",
-                    type: "unknown"
-                }))
-            };
+                tracks: sessionData.flatMap(genome => genome.tracks)
+            }, null, 2);
 
-            const sessionJson = JSON.stringify(sessionData, null, 2);
             document.getElementById('sessionJsonOutput').textContent = sessionJson;
         }
 
