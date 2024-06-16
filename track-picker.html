@@ -206,7 +206,7 @@
 
                     row.innerHTML = `
                         <td>${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-fasta-url="${data.reference.fastaURL}" data-index-url="${data.reference.indexURL}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
+                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
                         <td>${trackURL}</td>
                         <td>${indexURL}</td>
                         <td>${trackData}</td>
@@ -268,7 +268,7 @@
 
                 row.innerHTML = `
                     <td>${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
+                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
                     <td>${trackURL}</td>
                     <td>${indexURL}</td>
                     <td>${trackData}</td>
@@ -289,16 +289,15 @@
                 return;
             }
 
-            const uniqueReferences = [];
+            const uniqueReferences = new Set();
             const trackGroups = {};
 
             checkboxes.forEach(checkbox => {
                 const trackURL = checkbox.getAttribute('data-track');
                 const referenceData = JSON.parse(checkbox.getAttribute('data-refdata'));
+                const referenceString = JSON.stringify(referenceData);
 
-                if (!uniqueReferences.some(ref => JSON.stringify(ref) === JSON.stringify(referenceData))) {
-                    uniqueReferences.push(referenceData);
-                }
+                uniqueReferences.add(referenceString);
 
                 if (!trackGroups[trackURL]) {
                     trackGroups[trackURL] = [];
@@ -306,7 +305,7 @@
                 trackGroups[trackURL].push(JSON.parse(checkbox.getAttribute('data-trackdata')));
             });
 
-            if (uniqueReferences.length > 1) {
+            if (uniqueReferences.size > 1) {
                 alert('Tracks from different references cannot be combined.');
                 return;
             }
@@ -314,7 +313,7 @@
             const sessionJson = {
                 version: "2.15.11",
                 showSampleNames: false,
-                reference: uniqueReferences[0],
+                reference: JSON.parse([...uniqueReferences][0]),
                 locus: "all",
                 roi: [],
                 tracks: Object.values(trackGroups).flat()
@@ -335,3 +334,4 @@
     </script>
 </body>
 </html>
+
