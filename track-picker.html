@@ -206,7 +206,7 @@
 
                     row.innerHTML = `
                         <td>${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}'></td>
+                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-fasta-url="${data.reference.fastaURL}" data-index-url="${data.reference.indexURL}" data-trackdata='${trackData}'></td>
                         <td>${trackURL}</td>
                         <td>${indexURL}</td>
                         <td>${trackData}</td>
@@ -268,7 +268,7 @@
 
                 row.innerHTML = `
                     <td>${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}'></td>
+                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}'></td>
                     <td>${trackURL}</td>
                     <td>${indexURL}</td>
                     <td>${trackData}</td>
@@ -289,28 +289,38 @@
                 return;
             }
 
-            const uniqueTracks = [];
-            const trackURLs = new Set();
+            const uniqueReferences = [];
+            const trackGroups = {};
 
-            selectedTracks.forEach(track => {
-                if (!trackURLs.has(track.url)) {
-                    uniqueTracks.push(track);
-                    trackURLs.add(track.url);
+            checkboxes.forEach(checkbox => {
+                const trackURL = checkbox.getAttribute('data-track');
+                const referenceData = JSON.parse(checkbox.closest('table').querySelector('tbody tr td:nth-child(5)').textContent);
+
+                if (!uniqueReferences.some(ref => JSON.stringify(ref) === JSON.stringify(referenceData))) {
+                    uniqueReferences.push(referenceData);
                 }
+
+                if (!trackGroups[trackURL]) {
+                    trackGroups[trackURL] = [];
+                }
+                trackGroups[trackURL].push(JSON.parse(checkbox.getAttribute('data-trackdata')));
             });
 
-            const referenceData = JSON.parse(document.querySelector('.track-checkbox[data-track]').getAttribute('data-trackdata')).reference;
+            if (uniqueReferences.length > 1) {
+                alert('Tracks from different references cannot be combined.');
+                return;
+            }
 
-            const sessionJson = JSON.stringify({
+            const sessionJson = {
                 version: "2.15.11",
                 showSampleNames: false,
-                reference: referenceData,
+                reference: uniqueReferences[0],
                 locus: "all",
                 roi: [],
-                tracks: uniqueTracks
-            }, null, 2);
+                tracks: Object.values(trackGroups).flat()
+            };
 
-            document.getElementById('sessionJsonOutput').textContent = sessionJson;
+            document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
         }
 
         function saveSessionFile() {
