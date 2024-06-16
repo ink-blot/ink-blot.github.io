@@ -73,12 +73,12 @@
 
     <button onclick="loadFiles()">Load Files</button>
 
+    <h2>Genome Information</h2>
+    <textarea id="genomeInfo" class="output-box" readonly></textarea>
+
     <div id="tables-container"></div>
 
     <button onclick="generateLists()">Generate Lists</button>
-
-    <h2>Genome Information</h2>
-    <div id="genomeInfo" class="info-box"></div>
 
     <h2>Track Titles</h2>
     <div id="titleList" class="scroll-box"></div>
@@ -117,6 +117,7 @@
             const tablesContainer = document.getElementById('tables-container');
             tablesContainer.innerHTML = '';
             originalData = [];
+            let genomeInfoText = '';
 
             const fileList = document.getElementById('jsonFiles').files;
             const selectedURLs = Array.from(document.getElementById('urlPicker').selectedOptions).map(option => option.value);
@@ -147,12 +148,18 @@
             originalData.forEach(data => {
                 if (data.reference && data.tracks) {
                     // Session JSON format
+                    genomeInfoText += JSON.stringify(data.reference, null, 2) + '\n\n';
                     processSessionJSON(data);
                 } else {
                     // Original JSON format
+                    const genomeInfo = { ...data };
+                    delete genomeInfo.tracks;
+                    genomeInfoText += JSON.stringify(genomeInfo, null, 2) + '\n\n';
                     processGenomeJSON(data);
                 }
             });
+
+            document.getElementById('genomeInfo').textContent = genomeInfoText.trim();
         }
 
         function uncompressString(enc) {
@@ -192,14 +199,11 @@
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
-                    <th>Reference Data</th>
                 </tr>
             `;
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
-
-            const referenceData = JSON.stringify(data.reference);
 
             data.tracks.forEach(track => {
                 if (track.url) {
@@ -211,11 +215,10 @@
 
                     row.innerHTML = `
                         <td>${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-fasta-url="${data.reference.fastaURL}" data-index-url="${data.reference.indexURL}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
+                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-fasta-url="${data.reference.fastaURL}" data-index-url="${data.reference.indexURL}" data-trackdata='${trackData}'></td>
                         <td>${trackURL}</td>
                         <td>${indexURL}</td>
                         <td>${trackData}</td>
-                        <td>${referenceData}</td>
                     `;
                     tbody.appendChild(row);
                 }
@@ -240,21 +243,11 @@
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
-                    <th>Reference Data</th>
                 </tr>
             `;
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
-
-            const referenceData = JSON.stringify({
-                id: genome.id,
-                name: genome.name,
-                fastaURL: genome.fastaURL,
-                indexURL: genome.indexURL,
-                cytobandURL: genome.cytobandURL,
-                aliasURL: genome.aliasURL
-            });
 
             genome.tracks.forEach(track => {
                 const row = document.createElement('tr');
@@ -265,11 +258,10 @@
 
                 row.innerHTML = `
                     <td>${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
+                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-fasta-url="${genome.fastaURL}" data-index-url="${genome.indexURL}" data-trackdata='${trackData}'></td>
                     <td>${trackURL}</td>
                     <td>${indexURL}</td>
                     <td>${trackData}</td>
-                    <td>${referenceData}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -285,8 +277,7 @@
                 indexURL: checkbox.getAttribute('data-index'),
                 displayName: checkbox.getAttribute('data-name'),
                 fastaURL: checkbox.getAttribute('data-fasta-url'),
-                genomeIndexURL: checkbox.getAttribute('data-index-url'),
-                refData: JSON.parse(checkbox.getAttribute('data-refdata'))
+                genomeIndexURL: checkbox.getAttribute('data-index-url')
             }));
 
             if (selectedTracks.length === 0) {
@@ -308,18 +299,18 @@
                 return;
             }
 
-            const genomeInfo = sessionData.map(genome => ({
-                fastaURL: genome.reference ? genome.reference.fastaURL : genome.fastaURL,
-                indexURL: genome.reference ? genome.reference.indexURL : genome.indexURL
-            }));
-
-            document.getElementById('genomeInfo').textContent = genomeInfo.map(info => `Fasta URL: ${info.fastaURL}\nIndex URL: ${info.indexURL}`).join('\n\n');
-
             document.getElementById('titleList').textContent = selectedTracks.map(track => track.displayName).join(',');
             document.getElementById('trackList').textContent = selectedTracks.map(track => track.trackURL).join(',');
             document.getElementById('indexList').textContent = selectedTracks.map(track => track.indexURL).join(',');
 
-            const referenceData = selectedTracks[0].refData;
+            const referenceData = sessionData[0].reference ? sessionData[0].reference : {
+                id: sessionData[0].id,
+                name: sessionData[0].name,
+                fastaURL: sessionData[0].fastaURL,
+                indexURL: sessionData[0].indexURL,
+                cytobandURL: sessionData[0].cytobandURL,
+                aliasURL: sessionData[0].aliasURL
+            };
 
             const sessionJson = JSON.stringify({
                 version: "2.15.11",
