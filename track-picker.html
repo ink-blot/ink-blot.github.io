@@ -206,7 +206,7 @@
 
                     row.innerHTML = `
                         <td>${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
+                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}' data-fasta-url="${data.reference.fastaURL}"></td>
                         <td>${trackURL}</td>
                         <td>${indexURL}</td>
                         <td>${trackData}</td>
@@ -268,7 +268,7 @@
 
                 row.innerHTML = `
                     <td>${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}' data-refdata='${referenceData}'></td>
+                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}' data-fasta-url="${genome.fastaURL}"></td>
                     <td>${trackURL}</td>
                     <td>${indexURL}</td>
                     <td>${trackData}</td>
@@ -289,15 +289,14 @@
                 return;
             }
 
-            const uniqueReferences = new Set();
+            const uniqueFastaURLs = new Set();
             const trackGroups = {};
 
             checkboxes.forEach(checkbox => {
                 const trackURL = checkbox.getAttribute('data-track');
-                const referenceData = JSON.parse(checkbox.getAttribute('data-refdata'));
-                const referenceString = JSON.stringify(referenceData);
+                const fastaURL = checkbox.getAttribute('data-fasta-url');
 
-                uniqueReferences.add(referenceString);
+                uniqueFastaURLs.add(fastaURL);
 
                 if (!trackGroups[trackURL]) {
                     trackGroups[trackURL] = [];
@@ -305,10 +304,10 @@
                 trackGroups[trackURL].push(JSON.parse(checkbox.getAttribute('data-trackdata')));
             });
 
-            // Debug: Display the references being compared
-            alert(`References being compared:\n\n${[...uniqueReferences].join('\n\n')}`);
+            // Debug: Display the fasta URLs being compared
+            alert(`Fasta URLs being compared:\n\n${[...uniqueFastaURLs].join('\n\n')}`);
 
-            if (uniqueReferences.size > 1) {
+            if (uniqueFastaURLs.size > 1) {
                 alert('Tracks from different references cannot be combined.');
                 return;
             }
@@ -316,7 +315,7 @@
             const sessionJson = {
                 version: "2.15.11",
                 showSampleNames: false,
-                reference: JSON.parse([...uniqueReferences][0]),
+                reference: JSON.parse(originalData.find(data => data.reference.fastaURL === [...uniqueFastaURLs][0]).reference),
                 locus: "all",
                 roi: [],
                 tracks: Object.values(trackGroups).flat()
