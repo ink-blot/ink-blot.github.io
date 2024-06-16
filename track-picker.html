@@ -4,7 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Picker</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css">
+    
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            margin-bottom: 20px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -64,7 +78,19 @@
             font-size: 12px;
             margin-left: 10px;
         }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn {
+            margin-bottom: 10px;
+        }
     </style>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 </head>
 <body>
@@ -79,18 +105,19 @@
     <input type="text" id="urlInput" placeholder="Enter URLs here">
     <br><br>
 
-    <button onclick="loadFiles()">Load Files</button>
+    <button class="btn btn-primary" onclick="loadFiles()">Load Files</button>
 
+    <h2 id="trackDataHeader" style="display:none;">Track Data</h2>
     <div id="tables-container"></div>
 
-    <button onclick="generateSessionJson()">Generate Session JSON</button>
+    <button class="btn btn-primary" onclick="generateSessionJson()">Generate Session JSON</button>
 
     <h2>Session JSON Output</h2>
     <textarea id="sessionJsonOutput" class="output-box" readonly></textarea>
     <br>
     <label for="filenameInput">Filename:</label>
     <input type="text" id="filenameInput" value="session.json">
-    <button onclick="saveSessionFile()">Save Session File</button>
+    <button class="btn btn-secondary" onclick="saveSessionFile()">Save Session File</button>
 
     <h2>Blob URL</h2>
     <div id="blobUrlOutput"></div>
@@ -158,6 +185,10 @@
                     processGenomeJSON(data);
                 }
             });
+
+            if (originalData.length > 0) {
+                document.getElementById('trackDataHeader').style.display = 'block';
+            }
         }
 
         function uncompressString(enc) {
