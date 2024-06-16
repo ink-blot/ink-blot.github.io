@@ -102,8 +102,16 @@
         let originalData = [];
 
         async function loadJSON(url) {
-            const response = await fetch(url);
-            return await response.json();
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Failed to fetch JSON from ${url}:`, error);
+                alert(`Failed to fetch JSON from ${url}: ${error.message}`);
+            }
         }
 
         function readFile(file) {
@@ -136,7 +144,9 @@
             }
 
             for (const url of enteredURLs) {
-                allPromises.push(loadJSON(url));
+                // Convert regular GitHub URLs to raw content URLs
+                const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+                allPromises.push(loadJSON(rawUrl));
             }
 
             for (const blobUrl of enteredBlobURLs) {
@@ -144,7 +154,7 @@
             }
 
             const allData = await Promise.all(allPromises);
-            originalData = allData.flat();
+            originalData = allData.flat().filter(data => data); // Filter out any null or undefined results
 
             originalData.forEach(data => {
                 if (data.reference && data.tracks) {
@@ -365,4 +375,3 @@
     </script>
 </body>
 </html>
-
