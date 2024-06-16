@@ -312,10 +312,13 @@
                 return;
             }
 
+            const selectedReference = Array.from(document.querySelectorAll('tr')).find(row => row.cells[2] && row.cells[2].textContent === [...uniqueFastaURLs][0]);
+            const referenceData = JSON.parse(selectedReference.cells[4].textContent);
+
             const sessionJson = {
                 version: "2.15.11",
                 showSampleNames: false,
-                reference: JSON.parse(originalData.find(data => data.reference.fastaURL === [...uniqueFastaURLs][0]).reference),
+                reference: referenceData,
                 locus: "all",
                 roi: [],
                 tracks: Object.values(trackGroups).flat()
