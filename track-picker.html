@@ -30,6 +30,13 @@
             padding: 8px;
             box-sizing: border-box;
         }
+        .info-box {
+            width: 100%;
+            border: 1px solid #ddd;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -39,7 +46,7 @@
     <button onclick="generateLists()">Generate Lists</button>
 
     <h2>Genome Information</h2>
-    <div id="genomeInfo" class="scroll-box"></div>
+    <div id="genomeInfo" class="info-box"></div>
 
     <h2>Track Titles</h2>
     <div id="titleList" class="scroll-box"></div>
@@ -124,7 +131,7 @@
                 if (!genomeInfoSet) {
                     currentFastaURL = fastaURL;
                     currentIndexURL = genomeIndexURL;
-                    genomeInfo = `ID: ${genomeID}, fastaURL: ${currentFastaURL}, indexURL: ${currentIndexURL}`;
+                    genomeInfo = `ID: ${genomeID}\nFasta URL: ${currentFastaURL}\nIndex URL: ${currentIndexURL}`;
                     genomeInfoSet = true;
                 }
 
