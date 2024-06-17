@@ -40,6 +40,7 @@
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            /*text-overflow: ellipsis;*/
             white-space: nowrap;
         }
         th {
@@ -128,10 +129,6 @@
             transform: scale(1.2);
             margin-right: 10px;
         }
-        .select-all-checkbox {
-            transform: scale(1.2); /* Match the size of other checkboxes */
-            margin-right: 10px;
-        }
         .output-section {
             display: flex;
             flex-direction: column;
@@ -153,9 +150,8 @@
             justify-content: center;
             width: 100%;
         }
-        .checkbox-cell {
-            width: 100px; /* Adjusted width for the select column */
-            text-align: center;
+        .checkbox-cell input[type="checkbox"] {
+            transform: scale(1.2);
         }
     </style>
     
@@ -307,7 +303,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all-checkbox" onclick="toggleSelectAll(this)"></th>
+                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -359,7 +355,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all-checkbox" onclick="toggleSelectAll(this)"></th>
+                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
