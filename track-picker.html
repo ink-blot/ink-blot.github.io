@@ -40,6 +40,7 @@
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            /*text-overflow: ellipsis;*/
             white-space: nowrap;
         }
         th {
@@ -137,12 +138,8 @@
         .select-all {
             cursor: pointer;
             color: #007bff;
-            display: block;
-            margin: 5px auto 0; /* Center the select all checkbox under the title */
-        }
-        .checkbox-cell {
-            text-align: center;
-            width: 70px; /* Adjusted width for checkbox column */
+            margin-left: 10px; /* Added margin to separate the checkbox from the text */
+            transform: scale(1.2); /* Make the select-all checkbox the same size as the other checkboxes */
         }
         .center-button {
             display: flex;
@@ -153,6 +150,10 @@
             display: flex;
             justify-content: center;
             width: 100%;
+        }
+        .checkbox-cell {
+            text-align: center; /* Center align the checkbox cells */
+            width: 80px; /* Adjust the width of the checkbox column */
         }
     </style>
     
@@ -304,7 +305,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th class="checkbox-cell">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -356,7 +357,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th class="checkbox-cell">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
