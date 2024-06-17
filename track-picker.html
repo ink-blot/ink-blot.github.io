@@ -40,7 +40,6 @@
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            /*text-overflow: ellipsis;*/
             white-space: nowrap;
         }
         th {
@@ -129,6 +128,10 @@
             transform: scale(1.2);
             margin-right: 10px;
         }
+        .select-all-checkbox {
+            transform: scale(1.2); /* Match the size of other checkboxes */
+            margin-right: 10px;
+        }
         .output-section {
             display: flex;
             flex-direction: column;
@@ -139,7 +142,6 @@
             cursor: pointer;
             color: #007bff;
             margin-left: 10px; /* Added margin to separate the checkbox from the text */
-            transform: scale(1.2); /* Make the select-all checkbox the same size as the other checkboxes */
         }
         .center-button {
             display: flex;
@@ -152,8 +154,8 @@
             width: 100%;
         }
         .checkbox-cell {
-            text-align: center; /* Center align the checkbox cells */
-            width: 80px; /* Adjust the width of the checkbox column */
+            width: 100px; /* Adjusted width for the select column */
+            text-align: center;
         }
     </style>
     
@@ -305,7 +307,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="checkbox-cell">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all-checkbox" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -357,7 +359,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="checkbox-cell">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all-checkbox" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
