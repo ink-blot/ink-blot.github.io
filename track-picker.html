@@ -38,8 +38,9 @@
             text-align: left;
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
-            word-wrap: break-word;
-            white-space: normal;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         th {
             background-color: #f2f2f2;
@@ -140,6 +141,10 @@
             display: flex;
             justify-content: center;
             width: 100%;
+        }
+        .overflow-cell {
+            max-height: 24px;
+            overflow-y: auto;
         }
     </style>
     
@@ -305,9 +310,9 @@
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                <td>${data.reference.fastaURL}</td>
-                <td>${data.reference.indexURL}</td>
-                <td>${referenceData}</td>
+                <td class="overflow-cell">${data.reference.fastaURL}</td>
+                <td class="overflow-cell">${data.reference.indexURL}</td>
+                <td class="overflow-cell">${referenceData}</td>
             `;
             tbody.appendChild(refRow);
 
@@ -320,11 +325,11 @@
                     const trackData = JSON.stringify(track);
 
                     row.innerHTML = `
-                        <td>${track.name || track.filename}</td>
+                        <td class="overflow-cell">${track.name || track.filename}</td>
                         <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}' data-fasta-url="${data.reference.fastaURL}"></td>
-                        <td>${trackURL}</td>
-                        <td>${indexURL}</td>
-                        <td>${trackData}</td>
+                        <td class="overflow-cell">${trackURL}</td>
+                        <td class="overflow-cell">${indexURL}</td>
+                        <td class="overflow-cell">${trackData}</td>
                     `;
                     tbody.appendChild(row);
                 }
@@ -363,9 +368,9 @@
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                <td>${genome.fastaURL}</td>
-                <td>${genome.indexURL}</td>
-                <td>${referenceData}</td>
+                <td class="overflow-cell">${genome.fastaURL}</td>
+                <td class="overflow-cell">${genome.indexURL}</td>
+                <td class="overflow-cell">${referenceData}</td>
             `;
             tbody.appendChild(refRow);
 
@@ -377,11 +382,11 @@
                 const trackData = JSON.stringify(track);
 
                 row.innerHTML = `
-                    <td>${track.name}</td>
+                    <td class="overflow-cell">${track.name}</td>
                     <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}' data-fasta-url="${genome.fastaURL}"></td>
-                    <td>${trackURL}</td>
-                    <td>${indexURL}</td>
-                    <td>${trackData}</td>
+                    <td class="overflow-cell">${trackURL}</td>
+                    <td class="overflow-cell">${indexURL}</td>
+                    <td class="overflow-cell">${trackData}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -518,4 +523,3 @@
     </script>
 </body>
 </html>
-
