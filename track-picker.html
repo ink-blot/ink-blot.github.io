@@ -38,12 +38,13 @@
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
             position: relative;
+            white-space: nowrap;
         }
         th {
             background-color: #f2f2f2;
             text-align: center;
         }
-        .scrollable {
+        .scroll-box {
             overflow-x: auto;
             white-space: nowrap;
             max-width: 100%;
@@ -145,6 +146,12 @@
             display: flex;
             justify-content: center;
             width: 100%;
+        }
+        .scrollable-cell {
+            display: inline-block;
+            max-width: 200px;
+            overflow-x: auto;
+            vertical-align: top;
         }
     </style>
     
@@ -296,9 +303,9 @@
                 <tr>
                     <th>Track Name</th>
                     <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
-                    <th class="scroll-box">Track URLs</th>
-                    <th class="scroll-box">Index URLs</th>
-                    <th class="scroll-box">Track Data</th>
+                    <th>Track URLs</th>
+                    <th>Index URLs</th>
+                    <th>Track Data</th>
                 </tr>
             `;
             table.appendChild(thead);
@@ -309,11 +316,11 @@
             const referenceData = JSON.stringify(data.reference);
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
-                <td class="scroll-box">Reference</td>
+                <td class="scroll-box"><div class="scrollable-cell">Reference</div></td>
                 <td></td>
-                <td class="scroll-box"><div class="scrollable">${data.reference.fastaURL}</div></td>
-                <td class="scroll-box"><div class="scrollable">${data.reference.indexURL}</div></td>
-                <td class="scroll-box"><div class="scrollable">${referenceData}</div></td>
+                <td class="scroll-box"><div class="scrollable-cell">${data.reference.fastaURL}</div></td>
+                <td class="scroll-box"><div class="scrollable-cell">${data.reference.indexURL}</div></td>
+                <td class="scroll-box"><div class="scrollable-cell">${referenceData}</div></td>
             `;
             tbody.appendChild(refRow);
 
@@ -326,11 +333,11 @@
                     const trackData = JSON.stringify(track);
 
                     row.innerHTML = `
-                        <td class="scroll-box"><div class="scrollable">${track.name || track.filename}</div></td>
+                        <td class="scroll-box"><div class="scrollable-cell">${track.name || track.filename}</div></td>
                         <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}' data-fasta-url="${data.reference.fastaURL}"></td>
-                        <td class="scroll-box"><div class="scrollable">${trackURL}</div></td>
-                        <td class="scroll-box"><div class="scrollable">${indexURL}</div></td>
-                        <td class="scroll-box"><div class="scrollable">${trackData}</div></td>
+                        <td class="scroll-box"><div class="scrollable-cell">${trackURL}</div></td>
+                        <td class="scroll-box"><div class="scrollable-cell">${indexURL}</div></td>
+                        <td class="scroll-box"><div class="scrollable-cell">${trackData}</div></td>
                     `;
                     tbody.appendChild(row);
                 }
@@ -348,9 +355,9 @@
                 <tr>
                     <th>Track Name</th>
                     <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
-                    <th class="scroll-box">Track URLs</th>
-                    <th class="scroll-box">Index URLs</th>
-                    <th class="scroll-box">Track Data</th>
+                    <th>Track URLs</th>
+                    <th>Index URLs</th>
+                    <th>Track Data</th>
                 </tr>
             `;
             table.appendChild(thead);
@@ -368,11 +375,11 @@
             });
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
-                <td class="scroll-box"><div class="scrollable">Reference</div></td>
+                <td class="scroll-box"><div class="scrollable-cell">Reference</div></td>
                 <td></td>
-                <td class="scroll-box"><div class="scrollable">${genome.fastaURL}</div></td>
-                <td class="scroll-box"><div class="scrollable">${genome.indexURL}</div></td>
-                <td class="scroll-box"><div class="scrollable">${referenceData}</div></td>
+                <td class="scroll-box"><div class="scrollable-cell">${genome.fastaURL}</div></td>
+                <td class="scroll-box"><div class="scrollable-cell">${genome.indexURL}</div></td>
+                <td class="scroll-box"><div class="scrollable-cell">${referenceData}</div></td>
             `;
             tbody.appendChild(refRow);
 
@@ -384,11 +391,11 @@
                 const trackData = JSON.stringify(track);
 
                 row.innerHTML = `
-                    <td class="scroll-box"><div class="scrollable">${track.name}</div></td>
+                    <td class="scroll-box"><div class="scrollable-cell">${track.name}</div></td>
                     <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}' data-fasta-url="${genome.fastaURL}"></td>
-                    <td class="scroll-box"><div class="scrollable">${trackURL}</div></td>
-                    <td class="scroll-box"><div class="scrollable">${indexURL}</div></td>
-                    <td class="scroll-box"><div class="scrollable">${trackData}</div></td>
+                    <td class="scroll-box"><div class="scrollable-cell">${trackURL}</div></td>
+                    <td class="scroll-box"><div class="scrollable-cell">${indexURL}</div></td>
+                    <td class="scroll-box"><div class="scrollable-cell">${trackData}</div></td>
                 `;
                 tbody.appendChild(row);
             });
