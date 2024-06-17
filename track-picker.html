@@ -128,6 +128,12 @@
             transform: scale(1.2);
             margin-right: 10px;
         }
+        .output-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
     </style>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
@@ -154,9 +160,9 @@
 
     <button class="btn btn-primary" id="generateSessionButton" style="display: none;" onclick="generateSessionJson()">Generate Session JSON</button>
 
-    <div id="sessionJsonSection" style="display: none;">
+    <div id="sessionJsonSection" class="output-section" style="display: none;">
         <h2>Session JSON Output</h2>
-        <textarea id="sessionJsonOutput" class="output-box" readonly></textarea>
+        <textarea id="sessionJsonOutput" class="output-box" readonly style="width: 100%;"></textarea>
         <br>
         <div class="filename-group">
             <label for="filenameInput">Filename:</label>
@@ -497,3 +503,4 @@
     </script>
 </body>
 </html>
+
