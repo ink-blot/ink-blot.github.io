@@ -40,7 +40,6 @@
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            /*text-overflow: ellipsis;*/
             white-space: nowrap;
         }
         th {
@@ -300,7 +299,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin-right: 10px;"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -352,7 +351,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin-right: 10px;"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
