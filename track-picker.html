@@ -27,8 +27,11 @@
             width: 100%;
             margin-bottom: 20px;
         }
+        .scrollable-table-container {
+            display: flex;
+            overflow-x: auto;
+        }
         table {
-            width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
@@ -147,11 +150,12 @@
             justify-content: center;
             width: 100%;
         }
-        .scrollable-cell {
+        .scrollable-column {
             display: inline-block;
             max-width: 200px;
             overflow-x: auto;
             vertical-align: top;
+            height: 100%;
         }
     </style>
     
@@ -297,6 +301,7 @@
 
         function processSessionJSON(data) {
             const table = document.createElement('table');
+            table.className = 'scrollable-table-container';
 
             const thead = document.createElement('thead');
             thead.innerHTML = `
@@ -316,11 +321,11 @@
             const referenceData = JSON.stringify(data.reference);
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
-                <td class="scroll-box"><div class="scrollable-cell">Reference</div></td>
+                <td class="scroll-box"><div class="scrollable-column">Reference</div></td>
                 <td></td>
-                <td class="scroll-box"><div class="scrollable-cell">${data.reference.fastaURL}</div></td>
-                <td class="scroll-box"><div class="scrollable-cell">${data.reference.indexURL}</div></td>
-                <td class="scroll-box"><div class="scrollable-cell">${referenceData}</div></td>
+                <td class="scroll-box"><div class="scrollable-column">${data.reference.fastaURL}</div></td>
+                <td class="scroll-box"><div class="scrollable-column">${data.reference.indexURL}</div></td>
+                <td class="scroll-box"><div class="scrollable-column">${referenceData}</div></td>
             `;
             tbody.appendChild(refRow);
 
@@ -333,11 +338,11 @@
                     const trackData = JSON.stringify(track);
 
                     row.innerHTML = `
-                        <td class="scroll-box"><div class="scrollable-cell">${track.name || track.filename}</div></td>
+                        <td class="scroll-box"><div class="scrollable-column">${track.name || track.filename}</div></td>
                         <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}' data-fasta-url="${data.reference.fastaURL}"></td>
-                        <td class="scroll-box"><div class="scrollable-cell">${trackURL}</div></td>
-                        <td class="scroll-box"><div class="scrollable-cell">${indexURL}</div></td>
-                        <td class="scroll-box"><div class="scrollable-cell">${trackData}</div></td>
+                        <td class="scroll-box"><div class="scrollable-column">${trackURL}</div></td>
+                        <td class="scroll-box"><div class="scrollable-column">${indexURL}</div></td>
+                        <td class="scroll-box"><div class="scrollable-column">${trackData}</div></td>
                     `;
                     tbody.appendChild(row);
                 }
@@ -349,6 +354,7 @@
 
         function processGenomeJSON(genome) {
             const table = document.createElement('table');
+            table.className = 'scrollable-table-container';
 
             const thead = document.createElement('thead');
             thead.innerHTML = `
@@ -375,11 +381,11 @@
             });
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
-                <td class="scroll-box"><div class="scrollable-cell">Reference</div></td>
+                <td class="scroll-box"><div class="scrollable-column">Reference</div></td>
                 <td></td>
-                <td class="scroll-box"><div class="scrollable-cell">${genome.fastaURL}</div></td>
-                <td class="scroll-box"><div class="scrollable-cell">${genome.indexURL}</div></td>
-                <td class="scroll-box"><div class="scrollable-cell">${referenceData}</div></td>
+                <td class="scroll-box"><div class="scrollable-column">${genome.fastaURL}</div></td>
+                <td class="scroll-box"><div class="scrollable-column">${genome.indexURL}</div></td>
+                <td class="scroll-box"><div class="scrollable-column">${referenceData}</div></td>
             `;
             tbody.appendChild(refRow);
 
@@ -391,11 +397,11 @@
                 const trackData = JSON.stringify(track);
 
                 row.innerHTML = `
-                    <td class="scroll-box"><div class="scrollable-cell">${track.name}</div></td>
+                    <td class="scroll-box"><div class="scrollable-column">${track.name}</div></td>
                     <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}' data-fasta-url="${genome.fastaURL}"></td>
-                    <td class="scroll-box"><div class="scrollable-cell">${trackURL}</div></td>
-                    <td class="scroll-box"><div class="scrollable-cell">${indexURL}</div></td>
-                    <td class="scroll-box"><div class="scrollable-cell">${trackData}</div></td>
+                    <td class="scroll-box"><div class="scrollable-column">${trackURL}</div></td>
+                    <td class="scroll-box"><div class="scrollable-column">${indexURL}</div></td>
+                    <td class="scroll-box"><div class="scrollable-column">${trackData}</div></td>
                 `;
                 tbody.appendChild(row);
             });
