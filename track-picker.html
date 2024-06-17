@@ -24,36 +24,37 @@
             text-align: center;
         }
         .table-container {
-            width: 80%;
-            overflow-x: auto;
+            width: 100%;
             margin-bottom: 20px;
+            overflow-x: auto;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            table-layout: fixed;
         }
         th, td {
             padding: 8px;
             text-align: left;
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         th {
             background-color: #f2f2f2;
         }
         .scroll-box {
-            width: 80%;
-            height: auto;
             overflow-x: auto;
-            white-space: pre-wrap;
-            border: 1px solid #ddd;
-            padding: 8px;
-            box-sizing: border-box;
-            box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+        .scroll-box td {
+            width: 150px;
         }
         .info-box {
-            width: 80%;
+            width: 100%;
             border: 1px solid #ddd;
             padding: 8px;
             box-sizing: border-box;
@@ -62,8 +63,8 @@
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
         }
         .output-box {
-            width: 80%;
-            height: 150px;
+            width: 100%;
+            height: auto;
             overflow: auto;
             white-space: pre-wrap;
             border: 1px solid #ddd;
@@ -123,6 +124,10 @@
             justify-content: center;
             margin-bottom: 10px;
         }
+        .track-checkbox {
+            transform: scale(1.2);
+            margin-right: 10px;
+        }
     </style>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
@@ -138,7 +143,7 @@
     <div id="fileList" class="file-list"></div>
     <br><br>
 
-    <label for="urlInput" class="centered">Enter comma-separated URLs:</label>
+    <label for="urlInput" class="centered">and/or enter comma-separated URLs:</label>
     <input type="text" id="urlInput" class="form-control" placeholder="Enter URLs here" style="width: 80%;">
     <br><br>
 
@@ -285,9 +290,9 @@
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                <td>${data.reference.fastaURL}</td>
-                <td>${data.reference.indexURL}</td>
-                <td>${referenceData}</td>
+                <td class="scroll-box">${data.reference.fastaURL}</td>
+                <td class="scroll-box">${data.reference.indexURL}</td>
+                <td class="scroll-box">${referenceData}</td>
             `;
             tbody.appendChild(refRow);
 
@@ -300,11 +305,11 @@
                     const trackData = JSON.stringify(track);
 
                     row.innerHTML = `
-                        <td>${track.name || track.filename}</td>
+                        <td class="scroll-box">${track.name || track.filename}</td>
                         <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}' data-fasta-url="${data.reference.fastaURL}"></td>
-                        <td>${trackURL}</td>
-                        <td>${indexURL}</td>
-                        <td>${trackData}</td>
+                        <td class="scroll-box">${trackURL}</td>
+                        <td class="scroll-box">${indexURL}</td>
+                        <td class="scroll-box">${trackData}</td>
                     `;
                     tbody.appendChild(row);
                 }
@@ -344,9 +349,9 @@
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                <td>${genome.fastaURL}</td>
-                <td>${genome.indexURL}</td>
-                <td>${referenceData}</td>
+                <td class="scroll-box">${genome.fastaURL}</td>
+                <td class="scroll-box">${genome.indexURL}</td>
+                <td class="scroll-box">${referenceData}</td>
             `;
             tbody.appendChild(refRow);
 
@@ -358,11 +363,11 @@
                 const trackData = JSON.stringify(track);
 
                 row.innerHTML = `
-                    <td>${track.name}</td>
+                    <td class="scroll-box">${track.name}</td>
                     <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}' data-fasta-url="${genome.fastaURL}"></td>
-                    <td>${trackURL}</td>
-                    <td>${indexURL}</td>
-                    <td>${trackData}</td>
+                    <td class="scroll-box">${trackURL}</td>
+                    <td class="scroll-box">${indexURL}</td>
+                    <td class="scroll-box">${trackData}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -492,4 +497,3 @@
     </script>
 </body>
 </html>
-
