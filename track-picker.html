@@ -145,6 +145,11 @@
             justify-content: center;
             width: 100%;
         }
+        .notification-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
     </style>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
@@ -182,7 +187,9 @@
         <div class="center-button">
             <button class="btn btn-secondary" id="SaveSessionFile" style="display: inline-block;" onclick="saveSessionFile()">Save Session File</button>
         </div>
-        <div id="saveNotification" class="save-notification"></div>
+        <div class="notification-container">
+            <div id="saveNotification" class="save-notification">File saved as: session.json</div>
+        </div>
 
         <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
         <div id="blobUrlOutput" class="centered"></div>
@@ -524,4 +531,5 @@
     </script>
 </body>
 </html>
+
 
