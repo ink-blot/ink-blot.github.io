@@ -26,7 +26,7 @@
         .table-container {
             width: 100%;
             margin-bottom: 20px;
-            overflow-x: auto; /* Allow horizontal scrolling for the entire table container */
+            overflow-x: auto;
         }
         table {
             width: 100%;
@@ -42,12 +42,14 @@
         }
         th {
             background-color: #f2f2f2;
-            text-align: center; /* Center column headings */
+            text-align: center;
         }
         .scrollable {
             overflow-x: auto;
             white-space: nowrap;
-            max-width: 150px; /* Set a max width to control the size of the scrollable area */
+            max-width: 100%;
+            box-sizing: border-box;
+            padding: 5px;
         }
         .info-box {
             width: 100%;
@@ -60,7 +62,7 @@
         }
         .output-box {
             width: 100%;
-            height: 300px; /* Updated height */
+            height: 300px;
             overflow: auto;
             white-space: pre-wrap;
             border: 1px solid #ddd;
@@ -133,7 +135,7 @@
         .select-all {
             cursor: pointer;
             color: #007bff;
-            margin-left: 10px; /* Added margin to separate the checkbox from the text */
+            margin-left: 10px;
         }
         .center-button {
             display: flex;
@@ -235,14 +237,13 @@
                 if (url.includes('sessionURL=blob:')) {
                     allPromises.push(loadBlobURL(url));
                 } else {
-                    // Convert regular GitHub URLs to raw content URLs
                     const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
                     allPromises.push(loadJSON(rawUrl));
                 }
             }
 
             const allData = await Promise.all(allPromises);
-            originalData = allData.flat().filter(data => data); // Filter out any null or undefined results
+            originalData = allData.flat().filter(data => data);
 
             originalData.forEach(data => {
                 if (data.reference && data.tracks) {
