@@ -52,7 +52,7 @@
             white-space: nowrap;
         }
         .scroll-box td {
-            width: 150px;
+            overflow: auto;
         }
         .info-box {
             width: 100%;
@@ -301,9 +301,9 @@
                 <tr>
                     <th>Track Name</th>
                     <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
-                    <th>Track URLs</th>
-                    <th>Index URLs</th>
-                    <th>Track Data</th>
+                    <th class="scroll-box">Track URLs</th>
+                    <th class="scroll-box">Index URLs</th>
+                    <th class="scroll-box">Track Data</th>
                 </tr>
             `;
             table.appendChild(thead);
@@ -314,7 +314,7 @@
             const referenceData = JSON.stringify(data.reference);
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
-                <td>Reference</td>
+                <td class="scroll-box">Reference</td>
                 <td></td>
                 <td class="scroll-box">${data.reference.fastaURL}</td>
                 <td class="scroll-box">${data.reference.indexURL}</td>
@@ -353,9 +353,9 @@
                 <tr>
                     <th>Track Name</th>
                     <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
-                    <th>Track URLs</th>
-                    <th>Index URLs</th>
-                    <th>Track Data</th>
+                    <th class="scroll-box">Track URLs</th>
+                    <th class="scroll-box">Index URLs</th>
+                    <th class="scroll-box">Track Data</th>
                 </tr>
             `;
             table.appendChild(thead);
@@ -373,7 +373,7 @@
             });
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
-                <td>Reference</td>
+                <td class="scroll-box">Reference</td>
                 <td></td>
                 <td class="scroll-box">${genome.fastaURL}</td>
                 <td class="scroll-box">${genome.indexURL}</td>
