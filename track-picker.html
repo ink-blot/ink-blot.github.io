@@ -40,6 +40,7 @@
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            /*text-overflow: ellipsis;*/
             white-space: nowrap;
         }
         th {
@@ -148,6 +149,14 @@
             display: flex;
             justify-content: center;
             width: 100%;
+        }
+        /* Centering checkboxes and adjusting column width */
+        .checkbox-cell {
+            text-align: center;
+            width: 50px; /* Adjust the width as needed */
+        }
+        .checkbox-cell input {
+            transform: scale(1.2);
         }
     </style>
     
@@ -299,7 +308,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin-right: 10px;"></th>
+                    <th class="checkbox-cell">Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -314,7 +323,7 @@
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td></td>
+                <td class="checkbox-cell"></td>
                 <td class="scroll-box">${data.reference.fastaURL}</td>
                 <td class="scroll-box">${data.reference.indexURL}</td>
                 <td class="scroll-box">${referenceData}</td>
@@ -331,7 +340,7 @@
 
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}' data-fasta-url="${data.reference.fastaURL}"></td>
+                        <td class="checkbox-cell"><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-trackdata='${trackData}' data-fasta-url="${data.reference.fastaURL}"></td>
                         <td class="scroll-box">${trackURL}</td>
                         <td class="scroll-box">${indexURL}</td>
                         <td class="scroll-box">${trackData}</td>
@@ -351,7 +360,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin-right: 10px;"></th>
+                    <th class="checkbox-cell">Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -373,7 +382,7 @@
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td></td>
+                <td class="checkbox-cell"></td>
                 <td class="scroll-box">${genome.fastaURL}</td>
                 <td class="scroll-box">${genome.indexURL}</td>
                 <td class="scroll-box">${referenceData}</td>
@@ -389,7 +398,7 @@
 
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}' data-fasta-url="${genome.fastaURL}"></td>
+                    <td class="checkbox-cell"><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-trackdata='${trackData}' data-fasta-url="${genome.fastaURL}"></td>
                     <td class="scroll-box">${trackURL}</td>
                     <td class="scroll-box">${indexURL}</td>
                     <td class="scroll-box">${trackData}</td>
