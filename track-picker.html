@@ -40,12 +40,15 @@
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            /*text-overflow: ellipsis;*/
             white-space: nowrap;
         }
         th {
             background-color: #f2f2f2;
             text-align: center; /* Center column headings */
+        }
+        .checkbox-cell {
+            text-align: center;
+            width: 80px; /* Adjust the width as needed */
         }
         .scroll-box {
             overflow-x: auto;
@@ -149,9 +152,6 @@
             display: flex;
             justify-content: center;
             width: 100%;
-        }
-        .checkbox-cell input[type="checkbox"] {
-            transform: scale(1.2);
         }
     </style>
     
@@ -303,7 +303,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2);"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -318,7 +318,7 @@
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td></td>
+                <td class="checkbox-cell"></td>
                 <td class="scroll-box">${data.reference.fastaURL}</td>
                 <td class="scroll-box">${data.reference.indexURL}</td>
                 <td class="scroll-box">${referenceData}</td>
@@ -355,7 +355,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th class="checkbox-cell">Select <br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2);"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -377,7 +377,7 @@
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td></td>
+                <td class="checkbox-cell"></td>
                 <td class="scroll-box">${genome.fastaURL}</td>
                 <td class="scroll-box">${genome.indexURL}</td>
                 <td class="scroll-box">${referenceData}</td>
