@@ -40,6 +40,7 @@
             border: 1px solid #ddd;
             box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            /*text-overflow: ellipsis;*/
             white-space: nowrap;
         }
         th {
@@ -125,7 +126,8 @@
             margin-bottom: 10px;
         }
         .track-checkbox {
-            transform: scale(1.5);
+            transform: scale(1.2);
+            margin-right: 10px;
         }
         .output-section {
             display: flex;
@@ -137,9 +139,6 @@
             cursor: pointer;
             color: #007bff;
             margin-left: 10px; /* Added margin to separate the checkbox from the text */
-            transform: scale(1.5);
-            display: block;
-            margin-top: 5px;
         }
         .center-button {
             display: flex;
@@ -294,19 +293,15 @@
             }
         }
 
-        function escapeHtml(unsafe) {
-            return unsafe.replace(/[&<>"'`=\/]/g, function (char) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#39;',
-                    '`': '&#x60;',
-                    '=': '&#x3D;',
-                    '/': '&#x2F;'
-                }[char];
-            });
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
 
         function processSessionJSON(data) {
@@ -316,7 +311,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.5); margin-top: 5px;"></th>
+                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -344,16 +339,13 @@
 
                     const trackURL = track.url || '';
                     const indexURL = track.indexURL || '';
-                    const trackData = JSON.stringify(track);
-
-                    const trackName = escapeHtml(track.name || track.filename);
-                    const trackDescription = escapeHtml(track.description || '');
+                    const trackData = escapeHtml(JSON.stringify(track));
 
                     row.innerHTML = `
-                        <td class="scroll-box">${trackName}</td>
-                        <td style="text-align: center;"><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${trackName}" data-trackdata='${trackData}' data-fasta-url="${data.reference.fastaURL}" style="transform: scale(1.5); margin-top: 5px;"></td>
-                        <td class="scroll-box">${trackURL}</td>
-                        <td class="scroll-box">${indexURL}</td>
+                        <td class="scroll-box">${escapeHtml(track.name || track.filename)}</td>
+                        <td style="text-align: center;"><input type="checkbox" class="track-checkbox" data-track="${escapeHtml(trackURL)}" data-index="${escapeHtml(indexURL)}" data-name="${escapeHtml(track.name || track.filename)}" data-trackdata='${trackData}' data-fasta-url="${escapeHtml(data.reference.fastaURL)}" style="transform: scale(1.5); margin-top: 5px;"></td>
+                        <td class="scroll-box">${escapeHtml(trackURL)}</td>
+                        <td class="scroll-box">${escapeHtml(indexURL)}</td>
                         <td class="scroll-box">${trackData}</td>
                     `;
                     tbody.appendChild(row);
@@ -371,7 +363,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.5); margin-top: 5px;"></th>
+                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -405,16 +397,13 @@
 
                 const trackURL = track.url || '';
                 const indexURL = track.indexURL || '';
-                const trackData = JSON.stringify(track);
-
-                const trackName = escapeHtml(track.name);
-                const trackDescription = escapeHtml(track.description || '');
+                const trackData = escapeHtml(JSON.stringify(track));
 
                 row.innerHTML = `
-                    <td class="scroll-box">${trackName}</td>
-                    <td style="text-align: center;"><input type="checkbox" class="track-checkbox" data-track="${trackURL}" data-index="${indexURL}" data-name="${trackName}" data-trackdata='${trackData}' data-fasta-url="${genome.fastaURL}" style="transform: scale(1.5); margin-top: 5px;"></td>
-                    <td class="scroll-box">${trackURL}</td>
-                    <td class="scroll-box">${indexURL}</td>
+                    <td class="scroll-box">${escapeHtml(track.name)}</td>
+                    <td style="text-align: center;"><input type="checkbox" class="track-checkbox" data-track="${escapeHtml(trackURL)}" data-index="${escapeHtml(indexURL)}" data-name="${escapeHtml(track.name)}" data-trackdata='${trackData}' data-fasta-url="${escapeHtml(genome.fastaURL)}" style="transform: scale(1.5); margin-top: 5px;"></td>
+                    <td class="scroll-box">${escapeHtml(trackURL)}</td>
+                    <td class="scroll-box">${escapeHtml(indexURL)}</td>
                     <td class="scroll-box">${trackData}</td>
                 `;
                 tbody.appendChild(row);
