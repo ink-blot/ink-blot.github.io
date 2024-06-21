@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <meta http-equiv=“Pragma” content=”no-cache”>
-    <meta http-equiv=“Expires” content=”-1″>
-    <meta http-equiv=“CACHE-CONTROL” content=”NO-CACHE”>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
 
     <title>IGV</title>
 
@@ -48,7 +48,7 @@
 
     <script type="text/javascript" src="./igvwebConfig.js"></script>
 
-	<script src=./app_bundle-1.13.6.min.js></script>
+    <script src="./app_bundle-1.13.6.min.js"></script>
 
     <!-- CSS to hide the track select menu of the jBrowse circular view -->
     <style>
@@ -227,10 +227,11 @@
                         <div class="dropdown-divider"></div>
 
                         <!-- Save local session file -->
-                        <button class="dropdown-item" type="button" data-toggle="modal"
+                        <!--<button class="dropdown-item" type="button" data-toggle="modal"
                                 data-target="#igv-app-session-save-modal">
                             Save ...
-                        </button>
+                        </button>-->
+                        <!-- Save button disabled -->
 
                     </div>
 
@@ -271,7 +272,7 @@
                     <a id="igv-app-circular-view-dropdown-button" class="dropdown-toggle" href="#"
                        data-toggle="dropdown">Circular View</a>
 
-                    <div id="igv-app-circular-view-dropdown-menu" class="dropdown-menu">
+                    <div id="igv-app-circular-view-dropdown-menu">
 
                         <button id="igv-app-circular-view-presentation-button" class="dropdown-item" type="button">
                             Show
