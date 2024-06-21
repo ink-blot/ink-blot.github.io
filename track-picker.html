@@ -200,9 +200,9 @@
     <footer></footer>
 
     <script>
-        const mode = 'secure'; // or 'default'
         let originalData = [];
         let trackDataStore = {};
+        let mode = 'default'; // Set this to 'secure' for secure mode
 
         async function loadJSON(url) {
             try {
@@ -459,15 +459,15 @@
                 return;
             }
 
-            const selectedReference = Array.from(document.querySelectorAll('tr')).find(row => row.cells[2] && row.cells[2].textContent === [...uniqueFastaURLs][0]);
+            const selectedReference = originalData.find(data => data.reference && data.reference.fastaURL === [...uniqueFastaURLs][0]);
+            console.log('Selected reference:', selectedReference);
+
             if (!selectedReference) {
                 alert('Reference not found for the selected tracks.');
                 return;
             }
 
-            const referenceData = mode === 'default' ? JSON.parse(selectedReference.cells[4].textContent) : {
-                fastaURL: [...uniqueFastaURLs][0]
-            };
+            const referenceData = selectedReference.reference;
 
             const sessionJson = {
                 version: "2.15.11",
