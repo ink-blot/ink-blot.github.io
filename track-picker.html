@@ -202,8 +202,7 @@
     <script>
         let originalData = [];
         let trackDataStore = {};
-
-        const mode = 'secure'; // Change this to 'default' or 'secure'
+        let mode = 'secure';  // Change this to 'default' if needed
 
         async function loadJSON(url) {
             try {
@@ -307,7 +306,7 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>' : ''}
+                    ${mode === 'default' ? `<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>` : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -315,18 +314,17 @@
             const tbody = document.createElement('tbody');
 
             // Add reference row
-            if (mode === 'default') {
-                const referenceData = JSON.stringify(data.reference);
-                const refRow = document.createElement('tr');
-                refRow.innerHTML = `
-                    <td>Reference</td>
-                    <td></td>
+            const referenceData = JSON.stringify(data.reference);
+            const refRow = document.createElement('tr');
+            refRow.innerHTML = `
+                <td>Reference</td>
+                <td><input type="checkbox" class="track-checkbox" id="reference" style="transform: scale(1.2); margin: auto;"></td>
+                ${mode === 'default' ? `
                     <td class="scroll-box">${data.reference.fastaURL}</td>
                     <td class="scroll-box">${data.reference.indexURL}</td>
-                    <td class="scroll-box">${referenceData}</td>
-                `;
-                tbody.appendChild(refRow);
-            }
+                    <td class="scroll-box">${referenceData}</td>` : ''}
+            `;
+            tbody.appendChild(refRow);
 
             data.tracks.forEach((track, index) => {
                 if (track.url) {
@@ -343,9 +341,9 @@
                         <td class="scroll-box">${track.name || track.filename}</td>
                         <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
                         ${mode === 'default' ? `
-                        <td class="scroll-box">${track.url}</td>
-                        <td class="scroll-box">${track.indexURL || ''}</td>
-                        <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
+                            <td class="scroll-box">${track.url}</td>
+                            <td class="scroll-box">${track.indexURL || ''}</td>
+                            <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                     `;
                     tbody.appendChild(row);
                 }
@@ -363,7 +361,7 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>' : ''}
+                    ${mode === 'default' ? `<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>` : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -371,25 +369,24 @@
             const tbody = document.createElement('tbody');
 
             // Add reference row
-            if (mode === 'default') {
-                const referenceData = JSON.stringify({
-                    id: genome.id,
-                    name: genome.name,
-                    fastaURL: genome.fastaURL,
-                    indexURL: genome.indexURL,
-                    cytobandURL: genome.cytobandURL,
-                    aliasURL: genome.aliasURL
-                });
-                const refRow = document.createElement('tr');
-                refRow.innerHTML = `
-                    <td>Reference</td>
-                    <td></td>
+            const referenceData = JSON.stringify({
+                id: genome.id,
+                name: genome.name,
+                fastaURL: genome.fastaURL,
+                indexURL: genome.indexURL,
+                cytobandURL: genome.cytobandURL,
+                aliasURL: genome.aliasURL
+            });
+            const refRow = document.createElement('tr');
+            refRow.innerHTML = `
+                <td>Reference</td>
+                <td><input type="checkbox" class="track-checkbox" id="reference" style="transform: scale(1.2); margin: auto;"></td>
+                ${mode === 'default' ? `
                     <td class="scroll-box">${genome.fastaURL}</td>
                     <td class="scroll-box">${genome.indexURL}</td>
-                    <td class="scroll-box">${referenceData}</td>
-                `;
-                tbody.appendChild(refRow);
-            }
+                    <td class="scroll-box">${referenceData}</td>` : ''}
+            `;
+            tbody.appendChild(refRow);
 
             genome.tracks.forEach((track, index) => {
                 const row = document.createElement('tr');
@@ -405,9 +402,9 @@
                     <td class="scroll-box">${track.name}</td>
                     <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
                     ${mode === 'default' ? `
-                    <td class="scroll-box">${track.url}</td>
-                    <td class="scroll-box">${track.indexURL || ''}</td>
-                    <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
+                        <td class="scroll-box">${track.url}</td>
+                        <td class="scroll-box">${track.indexURL || ''}</td>
+                        <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                 `;
                 tbody.appendChild(row);
             });
@@ -440,12 +437,12 @@
         }
 
         function generateSessionJson() {
-            console.log('Generate Session JSON button clicked');
+            console.log("Generate Session JSON button clicked");
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
-            console.log('Selected checkboxes:', checkboxes);
+            console.log("Selected checkboxes:", checkboxes);
             const selectedTracks = Array.from(checkboxes).map(checkbox => {
                 const trackId = checkbox.id;
-                console.log('Selected track ID:', trackId);
+                console.log("Selected track ID:", trackId);
                 return JSON.parse(trackDataStore[trackId].trackData);
             });
 
@@ -474,58 +471,70 @@
                 return;
             }
 
-            const selectedReference = originalData.find(data => data.reference.fastaURL === [...uniqueFastaURLs][0]).reference;
-
+            const selectedReference = Object.values(trackDataStore).find(track => track.fastaURL === [...uniqueFastaURLs][0]);
             if (!selectedReference) {
                 alert('Reference not found for the selected tracks.');
                 return;
             }
+            const referenceData = selectedReference.fastaURL.includes('hg19') ? {
+                "id": "hg19",
+                "name": "Human (GRCh37/hg19)",
+                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            } : JSON.parse(selectedReference.trackData);
 
             const sessionJson = {
                 version: "2.15.11",
                 showSampleNames: false,
-                reference: selectedReference,
+                reference: referenceData,
                 locus: "all",
                 roi: [],
                 tracks: Object.values(trackGroups).flat()
             };
 
-            if (mode === 'secure') {
-                const compressedString = compressString(JSON.stringify(sessionJson));
-                const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
-
-                const link = document.createElement('a');
-                link.href = blobUrl;
-                link.textContent = 'Open Link';
-                link.target = '_blank';
-
-                const copyIcon = document.createElement('span');
-                copyIcon.className = 'copy-icon';
-                copyIcon.textContent = '📋';
-                copyIcon.onclick = () => {
-                    navigator.clipboard.writeText(blobUrl).then(() => {
-                        const notification = document.getElementById('copyNotification');
-                        notification.style.display = 'inline';
-                        setTimeout(() => {
-                            notification.style.display = 'none';
-                        }, 2000);
-                    });
-                };
-
-                const notification = document.createElement('span');
-                notification.id = 'copyNotification';
-                notification.className = 'copy-notification';
-                notification.textContent = 'Link copied!';
-
-                const output = document.getElementById('blobUrlOutput');
-                output.innerHTML = '';
-                output.appendChild(link);
-                output.appendChild(copyIcon);
-                output.appendChild(notification);
-
-                document.getElementById('blobUrlHeader').style.display = 'block';
-            } else {
+            if (mode === 'default') {
                 document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
+                document.getElementById('sessionJsonSection').style.display = 'block';
+            }
+
+            // Generate blob URL from session JSON
+            const compressedString = compressString(JSON.stringify(sessionJson));
+            const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.textContent = 'Open Link';
+            link.target = '_blank';
+
+            const copyIcon = document.createElement('span');
+            copyIcon.className = 'copy-icon';
+            copyIcon.textContent = '📋';
+            copyIcon.onclick = () => {
+                navigator.clipboard.writeText(blobUrl).then(() => {
+                    const notification = document.getElementById('copyNotification');
+                    notification.style.display = 'inline';
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                    }, 2000);
+                });
+            };
+
+            const notification = document.createElement('span');
+            notification.id = 'copyNotification';
+            notification.className = 'copy-notification';
+            notification.textContent = 'Link copied!';
+
+            const output = document.getElementById('blobUrlOutput');
+            output.innerHTML = '';
+            output.appendChild(link);
+            output.appendChild(copyIcon);
+            output.appendChild(notification);
+
+            document.getElementById('blobUrlHeader').style.display = 'block';
+            if (mode === 'secure') {
                 document.getElementById('sessionJsonSection').style.display = 'block';
             }
         }
@@ -552,4 +561,3 @@
     </script>
 </body>
 </html>
-
