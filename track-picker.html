@@ -193,16 +193,16 @@
             <div id="saveNotification" class="save-notification">File saved as: session.json</div>
         </div>
     </div>
-
+    
     <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
     <div id="blobUrlOutput" class="centered"></div>
 
     <footer></footer>
 
     <script>
+        const mode = 'secure'; // Set mode to 'default' or 'secure'
         let originalData = [];
         let trackDataStore = {};
-        const mode = 'secure';  // Change this to 'default' for default mode
 
         async function loadJSON(url) {
             try {
@@ -306,10 +306,7 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? `
-                    <th>Track URLs</th>
-                    <th>Index URLs</th>
-                    <th>Track Data</th>` : ''}
+                    ${mode === 'default' ? `<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>` : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -322,10 +319,7 @@
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                ${mode === 'default' ? `
-                <td class="scroll-box">${data.reference.fastaURL}</td>
-                <td class="scroll-box">${data.reference.indexURL}</td>
-                <td class="scroll-box">${referenceData}</td>` : ''}
+                ${mode === 'default' ? `<td class="scroll-box">${data.reference.fastaURL}</td><td class="scroll-box">${data.reference.indexURL}</td><td class="scroll-box">${referenceData}</td>` : ''}
             `;
             tbody.appendChild(refRow);
 
@@ -343,10 +337,7 @@
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
                         <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                        ${mode === 'default' ? `
-                        <td class="scroll-box">${track.url}</td>
-                        <td class="scroll-box">${track.indexURL || ''}</td>
-                        <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
+                        ${mode === 'default' ? `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                     `;
                     tbody.appendChild(row);
                 }
@@ -364,10 +355,7 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? `
-                    <th>Track URLs</th>
-                    <th>Index URLs</th>
-                    <th>Track Data</th>` : ''}
+                    ${mode === 'default' ? `<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>` : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -387,10 +375,7 @@
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                ${mode === 'default' ? `
-                <td class="scroll-box">${genome.fastaURL}</td>
-                <td class="scroll-box">${genome.indexURL}</td>
-                <td class="scroll-box">${referenceData}</td>` : ''}
+                ${mode === 'default' ? `<td class="scroll-box">${genome.fastaURL}</td><td class="scroll-box">${genome.indexURL}</td><td class="scroll-box">${referenceData}</td>` : ''}
             `;
             tbody.appendChild(refRow);
 
@@ -407,10 +392,7 @@
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
                     <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                    ${mode === 'default' ? `
-                    <td class="scroll-box">${track.url}</td>
-                    <td class="scroll-box">${track.indexURL || ''}</td>
-                    <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
+                    ${mode === 'default' ? `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                 `;
                 tbody.appendChild(row);
             });
@@ -477,14 +459,13 @@
                 return;
             }
 
-            const selectedReference = uniqueFastaURLs.values().next().value;
-
+            const selectedReference = originalData.find(data => data.reference.fastaURL === [...uniqueFastaURLs][0]);
+            console.log("Selected reference:", selectedReference);
             if (!selectedReference) {
                 alert('Reference not found for the selected tracks.');
                 return;
             }
-
-            const referenceData = JSON.parse(originalData.find(data => data.reference && data.reference.fastaURL === selectedReference).reference);
+            const referenceData = selectedReference.reference;
 
             const sessionJson = {
                 version: "2.15.11",
@@ -501,6 +482,7 @@
             }
 
             // Generate blob URL from session JSON
+            console.log("Secure mode: generating blob URL");
             const compressedString = compressString(JSON.stringify(sessionJson));
             const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
