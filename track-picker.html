@@ -497,7 +497,7 @@
                 roi: [],
                 tracks: Object.values(trackGroups).flat()
             };
-
+            mode = 'secure'
             if (mode === 'default') {
                 document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
                 document.getElementById('sessionJsonSection').style.display = 'block';
