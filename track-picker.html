@@ -202,7 +202,7 @@
     <script>
         let originalData = [];
         let trackDataStore = {};
-        const mode = 'secure'; // Change this to 'standard' for non-secure mode
+        let mode = 'secure';  // Set the mode to 'secure' for demonstration
 
         async function loadJSON(url) {
             try {
@@ -306,7 +306,9 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'secure' ? '' : '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>'}
+                    ${mode !== 'secure' ? '<th>Track URLs</th>' : ''}
+                    ${mode !== 'secure' ? '<th>Index URLs</th>' : ''}
+                    ${mode !== 'secure' ? '<th>Track Data</th>' : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -318,10 +320,19 @@
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="reference" style="transform: scale(1.2); margin: auto;"></td>
-                ${mode === 'secure' ? '' : `<td class="scroll-box">${data.reference.fastaURL}</td><td class="scroll-box">${data.reference.indexURL}</td><td class="scroll-box">${referenceData}</td>`}
+                <td><input type="checkbox" class="track-checkbox" id="reference" style="transform: scale(1.2); margin: auto;"></td>
+                ${mode !== 'secure' ? `<td class="scroll-box">${data.reference.fastaURL}</td>` : ''}
+                ${mode !== 'secure' ? `<td class="scroll-box">${data.reference.indexURL}</td>` : ''}
+                ${mode !== 'secure' ? `<td class="scroll-box">${referenceData}</td>` : ''}
             `;
             tbody.appendChild(refRow);
+
+            trackDataStore['reference'] = {
+                trackURL: '',
+                indexURL: '',
+                trackData: referenceData,
+                fastaURL: data.reference.fastaURL
+            };
 
             data.tracks.forEach((track, index) => {
                 if (track.url) {
@@ -337,7 +348,9 @@
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
                         <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                        ${mode === 'secure' ? '' : `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>`}
+                        ${mode !== 'secure' ? `<td class="scroll-box">${track.url}</td>` : ''}
+                        ${mode !== 'secure' ? `<td class="scroll-box">${track.indexURL || ''}</td>` : ''}
+                        ${mode !== 'secure' ? `<td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                     `;
                     tbody.appendChild(row);
                 }
@@ -355,7 +368,9 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'secure' ? '' : '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>'}
+                    ${mode !== 'secure' ? '<th>Track URLs</th>' : ''}
+                    ${mode !== 'secure' ? '<th>Index URLs</th>' : ''}
+                    ${mode !== 'secure' ? '<th>Track Data</th>' : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -374,10 +389,19 @@
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="reference" style="transform: scale(1.2); margin: auto;"></td>
-                ${mode === 'secure' ? '' : `<td class="scroll-box">${genome.fastaURL}</td><td class="scroll-box">${genome.indexURL}</td><td class="scroll-box">${referenceData}</td>`}
+                <td><input type="checkbox" class="track-checkbox" id="reference" style="transform: scale(1.2); margin: auto;"></td>
+                ${mode !== 'secure' ? `<td class="scroll-box">${genome.fastaURL}</td>` : ''}
+                ${mode !== 'secure' ? `<td class="scroll-box">${genome.indexURL}</td>` : ''}
+                ${mode !== 'secure' ? `<td class="scroll-box">${referenceData}</td>` : ''}
             `;
             tbody.appendChild(refRow);
+
+            trackDataStore['reference'] = {
+                trackURL: '',
+                indexURL: '',
+                trackData: referenceData,
+                fastaURL: genome.fastaURL
+            };
 
             genome.tracks.forEach((track, index) => {
                 const row = document.createElement('tr');
@@ -392,7 +416,9 @@
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
                     <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                    ${mode === 'secure' ? '' : `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>`}
+                    ${mode !== 'secure' ? `<td class="scroll-box">${track.url}</td>` : ''}
+                    ${mode !== 'secure' ? `<td class="scroll-box">${track.indexURL || ''}</td>` : ''}
+                    ${mode !== 'secure' ? `<td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                 `;
                 tbody.appendChild(row);
             });
@@ -425,12 +451,12 @@
         }
 
         function generateSessionJson() {
-            console.log('Generate Session JSON button clicked');
+            console.log("Generate Session JSON button clicked");
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
-            console.log('Selected checkboxes:', checkboxes);
+            console.log("Selected checkboxes:", checkboxes);
             const selectedTracks = Array.from(checkboxes).map(checkbox => {
                 const trackId = checkbox.id;
-                console.log('Selected track ID:', trackId);
+                console.log("Selected track ID:", trackId);
                 return JSON.parse(trackDataStore[trackId].trackData);
             });
 
@@ -459,7 +485,12 @@
                 return;
             }
 
-            const referenceData = JSON.parse(trackDataStore['reference'].trackData);
+            const selectedReference = trackDataStore['reference'];
+            if (!selectedReference) {
+                alert('Reference not found for the selected tracks.');
+                return;
+            }
+            const referenceData = JSON.parse(selectedReference.trackData);
 
             const sessionJson = {
                 version: "2.15.11",
@@ -470,10 +501,18 @@
                 tracks: Object.values(trackGroups).flat()
             };
 
-            if (mode === 'secure') {
-                const compressedString = compressString(JSON.stringify(sessionJson));
-                const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
+            if (mode !== 'secure') {
+                document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
+                document.getElementById('sessionJsonSection').style.display = 'block';
+            }
 
+            console.log("Secure mode: generating blob URL");
+
+            // Generate blob URL from session JSON
+            const compressedString = compressString(JSON.stringify(sessionJson));
+            const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
+
+            if (mode === 'secure') {
                 const link = document.createElement('a');
                 link.href = blobUrl;
                 link.textContent = 'Open Link';
@@ -504,9 +543,6 @@
                 output.appendChild(notification);
 
                 document.getElementById('blobUrlHeader').style.display = 'block';
-            } else {
-                document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
-                document.getElementById('sessionJsonSection').style.display = 'block';
             }
         }
 
