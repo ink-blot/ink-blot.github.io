@@ -226,6 +226,7 @@
             const tablesContainer = document.getElementById('tables-container');
             tablesContainer.innerHTML = '';
             originalData = [];
+            trackDataStore = {};
 
             const fileList = document.getElementById('jsonFiles').files;
             const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
@@ -300,7 +301,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select</th>
+                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin-top: 5px;"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -330,19 +331,19 @@
                     const indexURL = track.indexURL || '';
                     const trackData = JSON.stringify(track);
 
-                    const trackId = `${trackURL}-${index}`;
+                    const checkboxId = `track-checkbox-${index}`;
 
-                    trackDataStore[trackId] = {
-                        trackURL,
-                        indexURL,
-                        name: track.name || track.filename,
-                        trackData,
-                        fastaURL: data.reference.fastaURL
+                    trackDataStore[checkboxId] = {
+                        trackURL: trackURL,
+                        indexURL: indexURL,
+                        trackData: trackData,
+                        fastaURL: data.reference.fastaURL,
+                        name: track.name || track.filename
                     };
 
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" id="${trackId}"></td>
+                        <td><input type="checkbox" class="track-checkbox" id="${checkboxId}" style="transform: scale(1.2); margin-top: 5px;"></td>
                         <td class="scroll-box">${trackURL}</td>
                         <td class="scroll-box">${indexURL}</td>
                         <td class="scroll-box">${trackData}</td>
@@ -362,7 +363,7 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select</th>
+                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin-top: 5px;"></th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
                     <th>Track Data</th>
@@ -398,19 +399,19 @@
                 const indexURL = track.indexURL || '';
                 const trackData = JSON.stringify(track);
 
-                const trackId = `${trackURL}-${index}`;
+                const checkboxId = `track-checkbox-${index}`;
 
-                trackDataStore[trackId] = {
-                    trackURL,
-                    indexURL,
-                    name: track.name,
-                    trackData,
-                    fastaURL: genome.fastaURL
+                trackDataStore[checkboxId] = {
+                    trackURL: trackURL,
+                    indexURL: indexURL,
+                    trackData: trackData,
+                    fastaURL: genome.fastaURL,
+                    name: track.name
                 };
 
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" id="${trackId}"></td>
+                    <td><input type="checkbox" class="track-checkbox" id="${checkboxId}" style="transform: scale(1.2); margin-top: 5px;"></td>
                     <td class="scroll-box">${trackURL}</td>
                     <td class="scroll-box">${indexURL}</td>
                     <td class="scroll-box">${trackData}</td>
@@ -447,7 +448,10 @@
 
         function generateSessionJson() {
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
-            const selectedTracks = Array.from(checkboxes).map(checkbox => trackDataStore[checkbox.id]);
+            const selectedTracks = Array.from(checkboxes).map(checkbox => {
+                const id = checkbox.id;
+                return JSON.parse(trackDataStore[id].trackData);
+            });
 
             if (selectedTracks.length === 0) {
                 alert('No tracks selected.');
@@ -457,13 +461,17 @@
             const uniqueFastaURLs = new Set();
             const trackGroups = {};
 
-            selectedTracks.forEach(track => {
-                uniqueFastaURLs.add(track.fastaURL);
+            checkboxes.forEach(checkbox => {
+                const id = checkbox.id;
+                const trackURL = trackDataStore[id].trackURL;
+                const fastaURL = trackDataStore[id].fastaURL;
 
-                if (!trackGroups[track.trackURL]) {
-                    trackGroups[track.trackURL] = [];
+                uniqueFastaURLs.add(fastaURL);
+
+                if (!trackGroups[trackURL]) {
+                    trackGroups[trackURL] = [];
                 }
-                trackGroups[track.trackURL].push(JSON.parse(track.trackData));
+                trackGroups[trackURL].push(JSON.parse(trackDataStore[id].trackData));
             });
 
             if (uniqueFastaURLs.size > 1) {
