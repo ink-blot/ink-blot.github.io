@@ -202,7 +202,7 @@
     <script>
         let originalData = [];
         let trackDataStore = {};
-        const mode = 'secure'; // Change to 'default' for the default mode
+        let mode = 'secure'; // Set the mode to 'secure' or 'default'
 
         async function loadJSON(url) {
             try {
@@ -306,7 +306,11 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? `<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>` : ''}
+                    ${mode === 'default' ? `
+                    <th>Track URLs</th>
+                    <th>Index URLs</th>
+                    <th>Track Data</th>
+                    ` : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -314,14 +318,18 @@
             const tbody = document.createElement('tbody');
 
             // Add reference row
-            const referenceData = JSON.stringify(data.reference);
-            const refRow = document.createElement('tr');
-            refRow.innerHTML = `
-                <td>Reference</td>
-                <td></td>
-                ${mode === 'default' ? `<td class="scroll-box">${data.reference.fastaURL}</td><td class="scroll-box">${data.reference.indexURL}</td><td class="scroll-box">${referenceData}</td>` : ''}
-            `;
-            tbody.appendChild(refRow);
+            if (mode === 'default') {
+                const referenceData = JSON.stringify(data.reference);
+                const refRow = document.createElement('tr');
+                refRow.innerHTML = `
+                    <td>Reference</td>
+                    <td></td>
+                    <td class="scroll-box">${data.reference.fastaURL}</td>
+                    <td class="scroll-box">${data.reference.indexURL}</td>
+                    <td class="scroll-box">${referenceData}</td>
+                `;
+                tbody.appendChild(refRow);
+            }
 
             data.tracks.forEach((track, index) => {
                 if (track.url) {
@@ -331,13 +339,18 @@
                         trackURL: track.url || '',
                         indexURL: track.indexURL || '',
                         trackData: JSON.stringify(track),
-                        fastaURL: data.reference.fastaURL
+                        fastaURL: data.reference.fastaURL,
+                        reference: data.reference
                     };
 
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
                         <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                        ${mode === 'default' ? `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
+                        ${mode === 'default' ? `
+                        <td class="scroll-box">${track.url}</td>
+                        <td class="scroll-box">${track.indexURL || ''}</td>
+                        <td class="scroll-box">${JSON.stringify(track)}</td>
+                        ` : ''}
                     `;
                     tbody.appendChild(row);
                 }
@@ -355,7 +368,11 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? `<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>` : ''}
+                    ${mode === 'default' ? `
+                    <th>Track URLs</th>
+                    <th>Index URLs</th>
+                    <th>Track Data</th>
+                    ` : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -363,21 +380,25 @@
             const tbody = document.createElement('tbody');
 
             // Add reference row
-            const referenceData = JSON.stringify({
-                id: genome.id,
-                name: genome.name,
-                fastaURL: genome.fastaURL,
-                indexURL: genome.indexURL,
-                cytobandURL: genome.cytobandURL,
-                aliasURL: genome.aliasURL
-            });
-            const refRow = document.createElement('tr');
-            refRow.innerHTML = `
-                <td>Reference</td>
-                <td></td>
-                ${mode === 'default' ? `<td class="scroll-box">${genome.fastaURL}</td><td class="scroll-box">${genome.indexURL}</td><td class="scroll-box">${referenceData}</td>` : ''}
-            `;
-            tbody.appendChild(refRow);
+            if (mode === 'default') {
+                const referenceData = JSON.stringify({
+                    id: genome.id,
+                    name: genome.name,
+                    fastaURL: genome.fastaURL,
+                    indexURL: genome.indexURL,
+                    cytobandURL: genome.cytobandURL,
+                    aliasURL: genome.aliasURL
+                });
+                const refRow = document.createElement('tr');
+                refRow.innerHTML = `
+                    <td>Reference</td>
+                    <td></td>
+                    <td class="scroll-box">${genome.fastaURL}</td>
+                    <td class="scroll-box">${genome.indexURL}</td>
+                    <td class="scroll-box">${referenceData}</td>
+                `;
+                tbody.appendChild(refRow);
+            }
 
             genome.tracks.forEach((track, index) => {
                 const row = document.createElement('tr');
@@ -386,13 +407,18 @@
                     trackURL: track.url || '',
                     indexURL: track.indexURL || '',
                     trackData: JSON.stringify(track),
-                    fastaURL: genome.fastaURL
+                    fastaURL: genome.fastaURL,
+                    reference: genome
                 };
 
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
                     <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                    ${mode === 'default' ? `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
+                    ${mode === 'default' ? `
+                    <td class="scroll-box">${track.url}</td>
+                    <td class="scroll-box">${track.indexURL || ''}</td>
+                    <td class="scroll-box">${JSON.stringify(track)}</td>
+                    ` : ''}
                 `;
                 tbody.appendChild(row);
             });
@@ -425,12 +451,9 @@
         }
 
         function generateSessionJson() {
-            console.log("Generate Session JSON button clicked");
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
-            console.log("Selected checkboxes:", checkboxes);
             const selectedTracks = Array.from(checkboxes).map(checkbox => {
                 const trackId = checkbox.id;
-                console.log("Selected track ID:", trackId);
                 return JSON.parse(trackDataStore[trackId].trackData);
             });
 
@@ -444,7 +467,7 @@
 
             checkboxes.forEach(checkbox => {
                 const trackId = checkbox.id;
-                const { trackURL, fastaURL } = trackDataStore[trackId];
+                const { trackURL, fastaURL, reference } = trackDataStore[trackId];
 
                 uniqueFastaURLs.add(fastaURL);
 
@@ -459,29 +482,7 @@
                 return;
             }
 
-            const selectedReference = Array.from(document.querySelectorAll('tr')).find(row => {
-                if (mode === 'default') {
-                    return row.cells[2] && row.cells[2].textContent === [...uniqueFastaURLs][0];
-                } else {
-                    return trackDataStore[row.querySelector('.track-checkbox')?.id]?.fastaURL === [...uniqueFastaURLs][0];
-                }
-            });
-
-            if (!selectedReference) {
-                alert('Reference not found for the selected tracks.');
-                return;
-            }
-
-            let referenceData;
-            if (mode === 'default') {
-                referenceData = JSON.parse(selectedReference.cells[4].textContent);
-            } else {
-                referenceData = {
-                    fastaURL: selectedReference.querySelector('.track-checkbox')?.getAttribute('data-fasta-url')
-                };
-            }
-
-            console.log("Selected reference:", referenceData);
+            const referenceData = trackDataStore[Object.keys(trackDataStore)[0]].reference;
 
             const sessionJson = {
                 version: "2.15.11",
