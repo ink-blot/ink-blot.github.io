@@ -198,7 +198,7 @@
 
     <script>
         let originalData = [];
-        let trackDataStore = {}; // To store track data associated with checkboxes
+        let trackDataStore = {};
 
         async function loadJSON(url) {
             try {
@@ -226,7 +226,6 @@
             const tablesContainer = document.getElementById('tables-container');
             tablesContainer.innerHTML = '';
             originalData = [];
-            trackDataStore = {}; // Reset track data store
 
             const fileList = document.getElementById('jsonFiles').files;
             const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
@@ -241,13 +240,14 @@
                 if (url.includes('sessionURL=blob:')) {
                     allPromises.push(loadBlobURL(url));
                 } else {
+                    // Convert regular GitHub URLs to raw content URLs
                     const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
                     allPromises.push(loadJSON(rawUrl));
                 }
             }
 
             const allData = await Promise.all(allPromises);
-            originalData = allData.flat().filter(data => data);
+            originalData = allData.flat().filter(data => data); // Filter out any null or undefined results
 
             originalData.forEach(data => {
                 if (data.reference && data.tracks) {
@@ -300,15 +300,17 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th>Select</th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
+                    <th>Track Data</th>
                 </tr>
             `;
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
 
+            // Add reference row
             const referenceData = JSON.stringify(data.reference);
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
@@ -316,24 +318,34 @@
                 <td></td>
                 <td class="scroll-box">${data.reference.fastaURL}</td>
                 <td class="scroll-box">${data.reference.indexURL}</td>
+                <td class="scroll-box">${referenceData}</td>
             `;
             tbody.appendChild(refRow);
 
-            data.tracks.forEach(track => {
+            data.tracks.forEach((track, index) => {
                 if (track.url) {
                     const row = document.createElement('tr');
+
                     const trackURL = track.url || '';
                     const indexURL = track.indexURL || '';
                     const trackData = JSON.stringify(track);
 
-                    const checkboxId = `${trackURL}-${indexURL}`;
-                    trackDataStore[checkboxId] = trackData; // Store the track data
+                    const trackId = `${trackURL}-${index}`;
+
+                    trackDataStore[trackId] = {
+                        trackURL,
+                        indexURL,
+                        name: track.name || track.filename,
+                        trackData,
+                        fastaURL: data.reference.fastaURL
+                    };
 
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" id="${checkboxId}" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name || track.filename}" data-fasta-url="${data.reference.fastaURL}"></td>
+                        <td><input type="checkbox" class="track-checkbox" id="${trackId}"></td>
                         <td class="scroll-box">${trackURL}</td>
                         <td class="scroll-box">${indexURL}</td>
+                        <td class="scroll-box">${trackData}</td>
                     `;
                     tbody.appendChild(row);
                 }
@@ -350,15 +362,17 @@
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th>Select <input type="checkbox" class="select-all" onclick="toggleSelectAll(this)"></th>
+                    <th>Select</th>
                     <th>Track URLs</th>
                     <th>Index URLs</th>
+                    <th>Track Data</th>
                 </tr>
             `;
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
 
+            // Add reference row
             const referenceData = JSON.stringify({
                 id: genome.id,
                 name: genome.name,
@@ -373,23 +387,33 @@
                 <td></td>
                 <td class="scroll-box">${genome.fastaURL}</td>
                 <td class="scroll-box">${genome.indexURL}</td>
+                <td class="scroll-box">${referenceData}</td>
             `;
             tbody.appendChild(refRow);
 
-            genome.tracks.forEach(track => {
+            genome.tracks.forEach((track, index) => {
                 const row = document.createElement('tr');
+
                 const trackURL = track.url || '';
                 const indexURL = track.indexURL || '';
                 const trackData = JSON.stringify(track);
 
-                const checkboxId = `${trackURL}-${indexURL}`;
-                trackDataStore[checkboxId] = trackData; // Store the track data
+                const trackId = `${trackURL}-${index}`;
+
+                trackDataStore[trackId] = {
+                    trackURL,
+                    indexURL,
+                    name: track.name,
+                    trackData,
+                    fastaURL: genome.fastaURL
+                };
 
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" id="${checkboxId}" data-track="${trackURL}" data-index="${indexURL}" data-name="${track.name}" data-fasta-url="${genome.fastaURL}"></td>
+                    <td><input type="checkbox" class="track-checkbox" id="${trackId}"></td>
                     <td class="scroll-box">${trackURL}</td>
                     <td class="scroll-box">${indexURL}</td>
+                    <td class="scroll-box">${trackData}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -423,7 +447,7 @@
 
         function generateSessionJson() {
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
-            const selectedTracks = Array.from(checkboxes).map(checkbox => JSON.parse(trackDataStore[checkbox.id]));
+            const selectedTracks = Array.from(checkboxes).map(checkbox => trackDataStore[checkbox.id]);
 
             if (selectedTracks.length === 0) {
                 alert('No tracks selected.');
@@ -433,16 +457,13 @@
             const uniqueFastaURLs = new Set();
             const trackGroups = {};
 
-            checkboxes.forEach(checkbox => {
-                const trackURL = checkbox.getAttribute('data-track');
-                const fastaURL = checkbox.getAttribute('data-fasta-url');
+            selectedTracks.forEach(track => {
+                uniqueFastaURLs.add(track.fastaURL);
 
-                uniqueFastaURLs.add(fastaURL);
-
-                if (!trackGroups[trackURL]) {
-                    trackGroups[trackURL] = [];
+                if (!trackGroups[track.trackURL]) {
+                    trackGroups[track.trackURL] = [];
                 }
-                trackGroups[trackURL].push(JSON.parse(trackDataStore[checkbox.id]));
+                trackGroups[track.trackURL].push(JSON.parse(track.trackData));
             });
 
             if (uniqueFastaURLs.size > 1) {
@@ -455,7 +476,7 @@
                 alert('Reference not found for the selected tracks.');
                 return;
             }
-            const referenceData = JSON.parse(selectedReference.cells[2].textContent);
+            const referenceData = JSON.parse(selectedReference.cells[4].textContent);
 
             const sessionJson = {
                 version: "2.15.11",
@@ -469,6 +490,7 @@
             document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
             document.getElementById('sessionJsonSection').style.display = 'block';
 
+            // Generate blob URL from session JSON
             const compressedString = compressString(JSON.stringify(sessionJson));
             const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
