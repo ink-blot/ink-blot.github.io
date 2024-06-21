@@ -179,7 +179,7 @@
     <button class="btn btn-primary" id="generateSessionButton" style="display: none;" onclick="generateSessionJson()">Generate Session JSON</button>
 
     <div id="sessionJsonSection" class="output-section" style="display: none;">
-        <h2>Session JSON Output</h2>
+        <h2 id="sessionJsonOutputHeader">Session JSON Output</h2>
         <textarea id="sessionJsonOutput" class="output-box" readonly style="width: 100%;"></textarea>
         <br>
         <div class="filename-group">
@@ -202,7 +202,7 @@
     <script>
         let originalData = [];
         let trackDataStore = {};
-        let mode = 'secure';  // Change this to 'default' if needed
+        let mode = 'secure'; // Set the mode to 'secure' or 'default'
 
         async function loadJSON(url) {
             try {
@@ -306,7 +306,7 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? `<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>` : ''}
+                    ${mode === 'default' ? '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>' : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -318,11 +318,8 @@
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td><input type="checkbox" class="track-checkbox" id="reference" style="transform: scale(1.2); margin: auto;"></td>
-                ${mode === 'default' ? `
-                    <td class="scroll-box">${data.reference.fastaURL}</td>
-                    <td class="scroll-box">${data.reference.indexURL}</td>
-                    <td class="scroll-box">${referenceData}</td>` : ''}
+                <td></td>
+                ${mode === 'default' ? `<td class="scroll-box">${data.reference.fastaURL}</td><td class="scroll-box">${data.reference.indexURL}</td><td class="scroll-box">${referenceData}</td>` : ''}
             `;
             tbody.appendChild(refRow);
 
@@ -340,10 +337,7 @@
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
                         <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                        ${mode === 'default' ? `
-                            <td class="scroll-box">${track.url}</td>
-                            <td class="scroll-box">${track.indexURL || ''}</td>
-                            <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
+                        ${mode === 'default' ? `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                     `;
                     tbody.appendChild(row);
                 }
@@ -361,7 +355,7 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? `<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>` : ''}
+                    ${mode === 'default' ? '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>' : ''}
                 </tr>
             `;
             table.appendChild(thead);
@@ -380,11 +374,8 @@
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td><input type="checkbox" class="track-checkbox" id="reference" style="transform: scale(1.2); margin: auto;"></td>
-                ${mode === 'default' ? `
-                    <td class="scroll-box">${genome.fastaURL}</td>
-                    <td class="scroll-box">${genome.indexURL}</td>
-                    <td class="scroll-box">${referenceData}</td>` : ''}
+                <td></td>
+                ${mode === 'default' ? `<td class="scroll-box">${genome.fastaURL}</td><td class="scroll-box">${genome.indexURL}</td><td class="scroll-box">${referenceData}</td>` : ''}
             `;
             tbody.appendChild(refRow);
 
@@ -401,10 +392,7 @@
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
                     <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                    ${mode === 'default' ? `
-                        <td class="scroll-box">${track.url}</td>
-                        <td class="scroll-box">${track.indexURL || ''}</td>
-                        <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
+                    ${mode === 'default' ? `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                 `;
                 tbody.appendChild(row);
             });
@@ -471,12 +459,13 @@
                 return;
             }
 
-            const selectedReference = Object.values(trackDataStore).find(track => track.fastaURL === [...uniqueFastaURLs][0]);
+            const selectedReference = trackDataStore[checkboxes[0].id];
             if (!selectedReference) {
                 alert('Reference not found for the selected tracks.');
                 return;
             }
-            const referenceData = selectedReference.fastaURL.includes('hg19') ? {
+
+            const referenceData = {
                 "id": "hg19",
                 "name": "Human (GRCh37/hg19)",
                 "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
@@ -484,7 +473,7 @@
                 "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
                 "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
                 "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
-            } : JSON.parse(selectedReference.trackData);
+            };
 
             const sessionJson = {
                 version: "2.15.11",
@@ -533,9 +522,9 @@
             output.appendChild(copyIcon);
             output.appendChild(notification);
 
-            document.getElementById('blobUrlHeader').style.display = 'block';
             if (mode === 'secure') {
-                document.getElementById('sessionJsonSection').style.display = 'block';
+                document.getElementById('blobUrlHeader').style.display = 'block';
+                document.getElementById('blobUrlOutput').style.display = 'block';
             }
         }
 
@@ -558,6 +547,17 @@
                 checkbox.checked = selectAllCheckbox.checked;
             });
         }
+
+        // Initial hide/show based on mode
+        window.onload = function() {
+            if (mode === 'secure') {
+                document.getElementById('sessionJsonOutputHeader').style.display = 'none';
+                document.getElementById('sessionJsonOutput').style.display = 'none';
+                document.getElementById('filenameInput').style.display = 'none';
+                document.getElementById('SaveSessionFile').style.display = 'none';
+                document.getElementById('saveNotification').style.display = 'none';
+            }
+        };
     </script>
 </body>
 </html>
