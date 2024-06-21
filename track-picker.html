@@ -126,7 +126,7 @@
         }
         .track-checkbox {
             transform: scale(1.2);
-            margin-right: 10px;
+            margin: auto; /* Center the checkbox */
         }
         .output-section {
             display: flex;
@@ -150,10 +150,7 @@
             width: 100%;
         }
         .narrow-column {
-            width: 60px;
-        }
-        .select-all-container {
-            text-align: center;
+            width: 100px; /* Adjust the width as necessary */
         }
     </style>
     
@@ -203,9 +200,9 @@
     <footer></footer>
 
     <script>
+        const mode = 'default';  // Change to 'secure' to enable secure mode
         let originalData = [];
-        const trackDataStore = {};
-        const mode = 'secure'; // Set mode to 'secure' or 'default'
+        let trackDataStore = {};
 
         async function loadJSON(url) {
             try {
@@ -233,6 +230,7 @@
             const tablesContainer = document.getElementById('tables-container');
             tablesContainer.innerHTML = '';
             originalData = [];
+            trackDataStore = {};
 
             const fileList = document.getElementById('jsonFiles').files;
             const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
@@ -247,19 +245,20 @@
                 if (url.includes('sessionURL=blob:')) {
                     allPromises.push(loadBlobURL(url));
                 } else {
+                    // Convert regular GitHub URLs to raw content URLs
                     const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
                     allPromises.push(loadJSON(rawUrl));
                 }
             }
 
             const allData = await Promise.all(allPromises);
-            originalData = allData.flat().filter(data => data);
+            originalData = allData.flat().filter(data => data); // Filter out any null or undefined results
 
-            originalData.forEach((data, index) => {
+            originalData.forEach((data, dataIndex) => {
                 if (data.reference && data.tracks) {
-                    processSessionJSON(data, index);
+                    processSessionJSON(data, dataIndex);
                 } else {
-                    processGenomeJSON(data, index);
+                    processGenomeJSON(data, dataIndex);
                 }
             });
 
@@ -299,58 +298,55 @@
             }
         }
 
-        function processSessionJSON(data, tableIndex) {
+        function processSessionJSON(data, dataIndex) {
             const table = document.createElement('table');
 
             const thead = document.createElement('thead');
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="narrow-column">Select</th>
-                    ${mode === 'default' ? '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>' : ''}
-                </tr>
-                <tr class="select-all-container">
-                    <th></th>
-                    <th><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.5);"></th>
-                    ${mode === 'default' ? '<th></th><th></th><th></th>' : ''}
+                    <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
+                    ${mode === 'default' ? `
+                    <th>Track URLs</th>
+                    <th>Index URLs</th>
+                    <th>Track Data</th>` : ''}
                 </tr>
             `;
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
 
+            // Add reference row
             const referenceData = JSON.stringify(data.reference);
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td></td>
+                <td class="narrow-column"></td>
                 ${mode === 'default' ? `
-                    <td class="scroll-box">${data.reference.fastaURL}</td>
-                    <td class="scroll-box">${data.reference.indexURL}</td>
-                    <td class="scroll-box">${referenceData}</td>
-                ` : ''}
+                <td class="scroll-box">${data.reference.fastaURL}</td>
+                <td class="scroll-box">${data.reference.indexURL}</td>
+                <td class="scroll-box">${referenceData}</td>` : ''}
             `;
             tbody.appendChild(refRow);
 
-            data.tracks.forEach((track, trackIndex) => {
+            data.tracks.forEach((track, index) => {
                 if (track.url) {
                     const row = document.createElement('tr');
-
-                    const trackURL = track.url || '';
-                    const indexURL = track.indexURL || '';
-                    const trackData = JSON.stringify(track);
-
-                    const trackId = `track-${tableIndex}-${trackIndex}`;
-                    trackDataStore[trackId] = { trackURL, indexURL, trackData };
+                    const trackId = `track-${dataIndex}-${index}`;
+                    trackDataStore[trackId] = {
+                        trackURL: track.url || '',
+                        indexURL: track.indexURL || '',
+                        trackData: JSON.stringify(track),
+                        fastaURL: data.reference.fastaURL
+                    };
 
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
-                        <td><input type="checkbox" class="track-checkbox" id="${trackId}" data-fasta-url="${data.reference.fastaURL}" style="transform: scale(1.5); margin-top: 5px;"></td>
+                        <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
                         ${mode === 'default' ? `
-                            <td class="scroll-box">${trackURL}</td>
-                            <td class="scroll-box">${indexURL}</td>
-                            <td class="scroll-box">${trackData}</td>
-                        ` : ''}
+                        <td class="scroll-box">${track.url}</td>
+                        <td class="scroll-box">${track.indexURL || ''}</td>
+                        <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                     `;
                     tbody.appendChild(row);
                 }
@@ -360,26 +356,25 @@
             document.getElementById('tables-container').appendChild(table);
         }
 
-        function processGenomeJSON(genome, tableIndex) {
+        function processGenomeJSON(genome, dataIndex) {
             const table = document.createElement('table');
 
             const thead = document.createElement('thead');
             thead.innerHTML = `
                 <tr>
                     <th>Track Name</th>
-                    <th class="narrow-column">Select</th>
-                    ${mode === 'default' ? '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>' : ''}
-                </tr>
-                <tr class="select-all-container">
-                    <th></th>
-                    <th><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.5);"></th>
-                    ${mode === 'default' ? '<th></th><th></th><th></th>' : ''}
+                    <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
+                    ${mode === 'default' ? `
+                    <th>Track URLs</th>
+                    <th>Index URLs</th>
+                    <th>Track Data</th>` : ''}
                 </tr>
             `;
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
 
+            // Add reference row
             const referenceData = JSON.stringify({
                 id: genome.id,
                 name: genome.name,
@@ -391,33 +386,31 @@
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
-                <td></td>
+                <td class="narrow-column"></td>
                 ${mode === 'default' ? `
-                    <td class="scroll-box">${genome.fastaURL}</td>
-                    <td class="scroll-box">${genome.indexURL}</td>
-                    <td class="scroll-box">${referenceData}</td>
-                ` : ''}
+                <td class="scroll-box">${genome.fastaURL}</td>
+                <td class="scroll-box">${genome.indexURL}</td>
+                <td class="scroll-box">${referenceData}</td>` : ''}
             `;
             tbody.appendChild(refRow);
 
-            genome.tracks.forEach((track, trackIndex) => {
+            genome.tracks.forEach((track, index) => {
                 const row = document.createElement('tr');
-
-                const trackURL = track.url || '';
-                const indexURL = track.indexURL || '';
-                const trackData = JSON.stringify(track);
-
-                const trackId = `track-${tableIndex}-${trackIndex}`;
-                trackDataStore[trackId] = { trackURL, indexURL, trackData };
+                const trackId = `track-${dataIndex}-${index}`;
+                trackDataStore[trackId] = {
+                    trackURL: track.url || '',
+                    indexURL: track.indexURL || '',
+                    trackData: JSON.stringify(track),
+                    fastaURL: genome.fastaURL
+                };
 
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
-                    <td><input type="checkbox" class="track-checkbox" id="${trackId}" data-fasta-url="${genome.fastaURL}" style="transform: scale(1.5); margin-top: 5px;"></td>
+                    <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
                     ${mode === 'default' ? `
-                        <td class="scroll-box">${trackURL}</td>
-                        <td class="scroll-box">${indexURL}</td>
-                        <td class="scroll-box">${trackData}</td>
-                    ` : ''}
+                    <td class="scroll-box">${track.url}</td>
+                    <td class="scroll-box">${track.indexURL || ''}</td>
+                    <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                 `;
                 tbody.appendChild(row);
             });
@@ -451,7 +444,10 @@
 
         function generateSessionJson() {
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
-            const selectedTracks = Array.from(checkboxes).map(checkbox => trackDataStore[checkbox.id].trackData);
+            const selectedTracks = Array.from(checkboxes).map(checkbox => {
+                const trackId = checkbox.id;
+                return JSON.parse(trackDataStore[trackId].trackData);
+            });
 
             if (selectedTracks.length === 0) {
                 alert('No tracks selected.');
@@ -462,15 +458,15 @@
             const trackGroups = {};
 
             checkboxes.forEach(checkbox => {
-                const trackURL = trackDataStore[checkbox.id].trackURL;
-                const fastaURL = checkbox.getAttribute('data-fasta-url');
+                const trackId = checkbox.id;
+                const { trackURL, fastaURL } = trackDataStore[trackId];
 
                 uniqueFastaURLs.add(fastaURL);
 
                 if (!trackGroups[trackURL]) {
                     trackGroups[trackURL] = [];
                 }
-                trackGroups[trackURL].push(JSON.parse(trackDataStore[checkbox.id].trackData));
+                trackGroups[trackURL].push(JSON.parse(trackDataStore[trackId].trackData));
             });
 
             if (uniqueFastaURLs.size > 1) {
@@ -494,42 +490,45 @@
                 tracks: Object.values(trackGroups).flat()
             };
 
-            document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
-            document.getElementById('sessionJsonSection').style.display = 'block';
+            if (mode === 'default') {
+                document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
+                document.getElementById('sessionJsonSection').style.display = 'block';
 
-            const compressedString = compressString(JSON.stringify(sessionJson));
-            const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
+                // Generate blob URL from session JSON
+                const compressedString = compressString(JSON.stringify(sessionJson));
+                const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.textContent = 'Open Link';
-            link.target = '_blank';
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.textContent = 'Open Link';
+                link.target = '_blank';
 
-            const copyIcon = document.createElement('span');
-            copyIcon.className = 'copy-icon';
-            copyIcon.textContent = '📋';
-            copyIcon.onclick = () => {
-                navigator.clipboard.writeText(blobUrl).then(() => {
-                    const notification = document.getElementById('copyNotification');
-                    notification.style.display = 'inline';
-                    setTimeout(() => {
-                        notification.style.display = 'none';
-                    }, 2000);
-                });
-            };
+                const copyIcon = document.createElement('span');
+                copyIcon.className = 'copy-icon';
+                copyIcon.textContent = '📋';
+                copyIcon.onclick = () => {
+                    navigator.clipboard.writeText(blobUrl).then(() => {
+                        const notification = document.getElementById('copyNotification');
+                        notification.style.display = 'inline';
+                        setTimeout(() => {
+                            notification.style.display = 'none';
+                        }, 2000);
+                    });
+                };
 
-            const notification = document.createElement('span');
-            notification.id = 'copyNotification';
-            notification.className = 'copy-notification';
-            notification.textContent = 'Link copied!';
+                const notification = document.createElement('span');
+                notification.id = 'copyNotification';
+                notification.className = 'copy-notification';
+                notification.textContent = 'Link copied!';
 
-            const output = document.getElementById('blobUrlOutput');
-            output.innerHTML = '';
-            output.appendChild(link);
-            output.appendChild(copyIcon);
-            output.appendChild(notification);
+                const output = document.getElementById('blobUrlOutput');
+                output.innerHTML = '';
+                output.appendChild(link);
+                output.appendChild(copyIcon);
+                output.appendChild(notification);
 
-            document.getElementById('blobUrlHeader').style.display = 'block';
+                document.getElementById('blobUrlHeader').style.display = 'block';
+            }
         }
 
         function saveSessionFile() {
@@ -554,4 +553,3 @@
     </script>
 </body>
 </html>
-
