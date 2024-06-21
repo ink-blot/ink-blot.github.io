@@ -195,7 +195,7 @@
     </div>
 
     <div id="blobUrlSection" class="output-section" style="display: none;">
-        <h2 id="blobUrlHeader">Blob URL</h2>
+        <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
         <div id="blobUrlOutput" class="centered"></div>
     </div>
 
@@ -204,6 +204,7 @@
     <script>
         let originalData = [];
         let trackDataStore = {};
+        let mode = 'default';  // Change this to 'secure' to test secure mode
 
         async function loadJSON(url) {
             try {
@@ -307,9 +308,7 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    <th>Track URLs</th>
-                    <th>Index URLs</th>
-                    <th>Track Data</th>
+                    ${mode === 'secure' ? '' : '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>'}
                 </tr>
             `;
             table.appendChild(thead);
@@ -322,9 +321,7 @@
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                <td class="scroll-box">${data.reference.fastaURL}</td>
-                <td class="scroll-box">${data.reference.indexURL}</td>
-                <td class="scroll-box">${referenceData}</td>
+                ${mode === 'secure' ? '' : `<td class="scroll-box">${data.reference.fastaURL}</td><td class="scroll-box">${data.reference.indexURL}</td><td class="scroll-box">${referenceData}</td>`}
             `;
             tbody.appendChild(refRow);
 
@@ -342,9 +339,7 @@
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
                         <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                        <td class="scroll-box">${track.url}</td>
-                        <td class="scroll-box">${track.indexURL || ''}</td>
-                        <td class="scroll-box">${JSON.stringify(track)}</td>
+                        ${mode === 'secure' ? '' : `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>`}
                     `;
                     tbody.appendChild(row);
                 }
@@ -362,9 +357,7 @@
                 <tr>
                     <th>Track Name</th>
                     <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    <th>Track URLs</th>
-                    <th>Index URLs</th>
-                    <th>Track Data</th>
+                    ${mode === 'secure' ? '' : '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>'}
                 </tr>
             `;
             table.appendChild(thead);
@@ -384,9 +377,7 @@
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                <td class="scroll-box">${genome.fastaURL}</td>
-                <td class="scroll-box">${genome.indexURL}</td>
-                <td class="scroll-box">${referenceData}</td>
+                ${mode === 'secure' ? '' : `<td class="scroll-box">${genome.fastaURL}</td><td class="scroll-box">${genome.indexURL}</td><td class="scroll-box">${referenceData}</td>`}
             `;
             tbody.appendChild(refRow);
 
@@ -403,9 +394,7 @@
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
                     <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                    <td class="scroll-box">${track.url}</td>
-                    <td class="scroll-box">${track.indexURL || ''}</td>
-                    <td class="scroll-box">${JSON.stringify(track)}</td>
+                    ${mode === 'secure' ? '' : `<td class="scroll-box">${track.url}</td><td class="scroll-box">${track.indexURL || ''}</td><td class="scroll-box">${JSON.stringify(track)}</td>`}
                 `;
                 tbody.appendChild(row);
             });
@@ -439,10 +428,8 @@
 
         function generateSessionJson() {
             console.log("Generate Session JSON button clicked");
-
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
             console.log("Selected checkboxes:", checkboxes);
-
             const selectedTracks = Array.from(checkboxes).map(checkbox => {
                 const trackId = checkbox.id;
                 console.log("Selected track ID:", trackId);
@@ -476,12 +463,10 @@
 
             const selectedReference = Array.from(document.querySelectorAll('tr')).find(row => row.cells[2] && row.cells[2].textContent === [...uniqueFastaURLs][0]);
             console.log("Selected reference:", selectedReference);
-
             if (!selectedReference) {
                 alert('Reference not found for the selected tracks.');
                 return;
             }
-
             const referenceData = JSON.parse(selectedReference.cells[4].textContent);
 
             const sessionJson = {
@@ -493,45 +478,80 @@
                 tracks: Object.values(trackGroups).flat()
             };
 
-            if (mode === 'default') {
+            if (mode === 'secure') {
+                console.log("Secure mode: generating blob URL");
+                const compressedString = compressString(JSON.stringify(sessionJson));
+                const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
+
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.textContent = 'Open Link';
+                link.target = '_blank';
+
+                const copyIcon = document.createElement('span');
+                copyIcon.className = 'copy-icon';
+                copyIcon.textContent = '📋';
+                copyIcon.onclick = () => {
+                    navigator.clipboard.writeText(blobUrl).then(() => {
+                        const notification = document.getElementById('copyNotification');
+                        notification.style.display = 'inline';
+                        setTimeout(() => {
+                            notification.style.display = 'none';
+                        }, 2000);
+                    });
+                };
+
+                const notification = document.createElement('span');
+                notification.id = 'copyNotification';
+                notification.className = 'copy-notification';
+                notification.textContent = 'Link copied!';
+
+                const output = document.getElementById('blobUrlOutput');
+                output.innerHTML = '';
+                output.appendChild(link);
+                output.appendChild(copyIcon);
+                output.appendChild(notification);
+
+                document.getElementById('blobUrlHeader').style.display = 'block';
+                document.getElementById('blobUrlSection').style.display = 'block';
+            } else {
                 document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
                 document.getElementById('sessionJsonSection').style.display = 'block';
+
+                const compressedString = compressString(JSON.stringify(sessionJson));
+                const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
+
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.textContent = 'Open Link';
+                link.target = '_blank';
+
+                const copyIcon = document.createElement('span');
+                copyIcon.className = 'copy-icon';
+                copyIcon.textContent = '📋';
+                copyIcon.onclick = () => {
+                    navigator.clipboard.writeText(blobUrl).then(() => {
+                        const notification = document.getElementById('copyNotification');
+                        notification.style.display = 'inline';
+                        setTimeout(() => {
+                            notification.style.display = 'none';
+                        }, 2000);
+                    });
+                };
+
+                const notification = document.createElement('span');
+                notification.id = 'copyNotification';
+                notification.className = 'copy-notification';
+                notification.textContent = 'Link copied!';
+
+                const output = document.getElementById('blobUrlOutput');
+                output.innerHTML = '';
+                output.appendChild(link);
+                output.appendChild(copyIcon);
+                output.appendChild(notification);
+
+                document.getElementById('blobUrlHeader').style.display = 'block';
             }
-
-            // Generate blob URL from session JSON
-            const compressedString = compressString(JSON.stringify(sessionJson));
-            const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
-
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.textContent = 'Open Link';
-            link.target = '_blank';
-
-            const copyIcon = document.createElement('span');
-            copyIcon.className = 'copy-icon';
-            copyIcon.textContent = '📋';
-            copyIcon.onclick = () => {
-                navigator.clipboard.writeText(blobUrl).then(() => {
-                    const notification = document.getElementById('copyNotification');
-                    notification.style.display = 'inline';
-                    setTimeout(() => {
-                        notification.style.display = 'none';
-                    }, 2000);
-                });
-            };
-
-            const notification = document.createElement('span');
-            notification.id = 'copyNotification';
-            notification.className = 'copy-notification';
-            notification.textContent = 'Link copied!';
-
-            const output = document.getElementById('blobUrlOutput');
-            output.innerHTML = '';
-            output.appendChild(link);
-            output.appendChild(copyIcon);
-            output.appendChild(notification);
-
-            document.getElementById('blobUrlSection').style.display = 'block';
         }
 
         function saveSessionFile() {
@@ -556,4 +576,3 @@
     </script>
 </body>
 </html>
-
