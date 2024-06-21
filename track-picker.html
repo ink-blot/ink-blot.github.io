@@ -192,17 +192,17 @@
         <div class="notification-container">
             <div id="saveNotification" class="save-notification">File saved as: session.json</div>
         </div>
-
-        <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
-        <div id="blobUrlOutput" class="centered"></div>
     </div>
+
+    <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
+    <div id="blobUrlOutput" class="centered"></div>
 
     <footer></footer>
 
     <script>
+        const mode = 'secure'; // or 'default'
         let originalData = [];
         let trackDataStore = {};
-        const mode = 'secure'; // Change this to 'default' or 'secure' as needed
 
         async function loadJSON(url) {
             try {
@@ -459,22 +459,20 @@
                 return;
             }
 
-            const selectedReference = uniqueFastaURLs.values().next().value;
+            const selectedReference = Array.from(document.querySelectorAll('tr')).find(row => row.cells[2] && row.cells[2].textContent === [...uniqueFastaURLs][0]);
+            if (!selectedReference) {
+                alert('Reference not found for the selected tracks.');
+                return;
+            }
 
-            const referenceData = originalData.find(data => {
-                if (data.reference) {
-                    return data.reference.fastaURL === selectedReference;
-                } else {
-                    return data.fastaURL === selectedReference;
-                }
-            });
-
-            console.log('Selected reference:', referenceData);
+            const referenceData = mode === 'default' ? JSON.parse(selectedReference.cells[4].textContent) : {
+                fastaURL: [...uniqueFastaURLs][0]
+            };
 
             const sessionJson = {
                 version: "2.15.11",
                 showSampleNames: false,
-                reference: referenceData.reference ? referenceData.reference : referenceData,
+                reference: referenceData,
                 locus: "all",
                 roi: [],
                 tracks: Object.values(trackGroups).flat()
