@@ -194,15 +194,17 @@
         </div>
     </div>
 
-    <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
-    <div id="blobUrlOutput" class="centered"></div>
+    <div class="output-section" style="display: none;" id="blobUrlSection">
+        <h2 id="blobUrlHeader">Blob URL</h2>
+        <div id="blobUrlOutput" class="centered"></div>
+    </div>
 
     <footer></footer>
 
     <script>
         let originalData = [];
         let trackDataStore = {};
-        let mode = 'secure'; // Set mode to 'secure' or 'default'
+        let mode = 'default'; // Set mode here
 
         async function loadJSON(url) {
             try {
@@ -319,8 +321,7 @@
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                ${mode === 'default' ? `
-                <td class="scroll-box">${data.reference.fastaURL}</td>
+                ${mode === 'default' ? `<td class="scroll-box">${data.reference.fastaURL}</td>
                 <td class="scroll-box">${data.reference.indexURL}</td>
                 <td class="scroll-box">${referenceData}</td>` : ''}
             `;
@@ -340,8 +341,7 @@
                     row.innerHTML = `
                         <td class="scroll-box">${track.name || track.filename}</td>
                         <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                        ${mode === 'default' ? `
-                        <td class="scroll-box">${track.url}</td>
+                        ${mode === 'default' ? `<td class="scroll-box">${track.url}</td>
                         <td class="scroll-box">${track.indexURL || ''}</td>
                         <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                     `;
@@ -369,22 +369,21 @@
             const tbody = document.createElement('tbody');
 
             // Add reference row
-            const referenceData = {
+            const referenceData = JSON.stringify({
                 id: genome.id,
                 name: genome.name,
                 fastaURL: genome.fastaURL,
                 indexURL: genome.indexURL,
                 cytobandURL: genome.cytobandURL,
                 aliasURL: genome.aliasURL
-            };
+            });
             const refRow = document.createElement('tr');
             refRow.innerHTML = `
                 <td>Reference</td>
                 <td></td>
-                ${mode === 'default' ? `
-                <td class="scroll-box">${genome.fastaURL}</td>
+                ${mode === 'default' ? `<td class="scroll-box">${genome.fastaURL}</td>
                 <td class="scroll-box">${genome.indexURL}</td>
-                <td class="scroll-box">${JSON.stringify(referenceData)}</td>` : ''}
+                <td class="scroll-box">${referenceData}</td>` : ''}
             `;
             tbody.appendChild(refRow);
 
@@ -401,8 +400,7 @@
                 row.innerHTML = `
                     <td class="scroll-box">${track.name}</td>
                     <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                    ${mode === 'default' ? `
-                    <td class="scroll-box">${track.url}</td>
+                    ${mode === 'default' ? `<td class="scroll-box">${track.url}</td>
                     <td class="scroll-box">${track.indexURL || ''}</td>
                     <td class="scroll-box">${JSON.stringify(track)}</td>` : ''}
                 `;
@@ -438,10 +436,8 @@
 
         function generateSessionJson() {
             console.log("Generate Session JSON button clicked");
-
             const checkboxes = document.querySelectorAll('.track-checkbox:checked');
             console.log("Selected checkboxes:", checkboxes);
-
             const selectedTracks = Array.from(checkboxes).map(checkbox => {
                 const trackId = checkbox.id;
                 console.log("Selected track ID:", trackId);
@@ -473,12 +469,21 @@
                 return;
             }
 
-            const selectedReference = Object.values(trackDataStore).find(data => data.fastaURL === [...uniqueFastaURLs][0]);
-            if (!selectedReference) {
-                alert('Reference not found for the selected tracks.');
-                return;
+            let referenceData;
+            const selectedReference = Array.from(document.querySelectorAll('tr')).find(row => {
+                return row.cells[2] && uniqueFastaURLs.has(row.cells[2].textContent);
+            });
+
+            if (selectedReference) {
+                referenceData = JSON.parse(selectedReference.cells[4].textContent);
+            } else {
+                const referenceTrack = Array.from(checkboxes).map(checkbox => trackDataStore[checkbox.id]).find(track => track.fastaURL);
+                referenceData = {
+                    fastaURL: referenceTrack.fastaURL,
+                    indexURL: referenceTrack.indexURL
+                };
             }
-            const referenceData = originalData.find(data => data.reference && data.reference.fastaURL === selectedReference.fastaURL).reference;
+
             console.log("Selected reference:", referenceData);
 
             const sessionJson = {
@@ -528,7 +533,7 @@
             output.appendChild(copyIcon);
             output.appendChild(notification);
 
-            document.getElementById('blobUrlHeader').style.display = 'block';
+            document.getElementById('blobUrlSection').style.display = 'block';
         }
 
         function saveSessionFile() {
