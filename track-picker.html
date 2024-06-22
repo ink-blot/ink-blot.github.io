@@ -270,9 +270,9 @@
                 document.getElementById('generateSessionButton').style.display = 'inline-block';
             }
 
-            // Display the number of blobs loaded
+            // Display blob count
             const blobCount = enteredURLs.filter(url => url.startsWith('blob:')).length;
-            document.getElementById('blobCount').innerText = `${blobCount} blob files loaded.`;
+            document.getElementById('blobCount').innerText = `${blobCount} blob(s) loaded.`;
         }
 
         function uncompressString(enc) {
@@ -550,7 +550,8 @@
             const sessionURLs = urlParams.get('sessionURL');
 
             if (sessionURLs) {
-                document.getElementById('urlInput').value = sessionURLs.split('%2C').map(url => 'blob:' + url).join(', ');
+                const formattedURLs = sessionURLs.split('%2C').map(url => url.startsWith('blob:') ? url : 'blob:' + url).join(', ');
+                document.getElementById('urlInput').value = formattedURLs;
                 await loadFiles();
             }
         }
