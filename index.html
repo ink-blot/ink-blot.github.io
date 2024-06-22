@@ -56,7 +56,8 @@
             display: none;
         }
         .igv-app-social-button-container > div,
-        .igv-app-social-button-container > a {
+        .igv-app-social-button-container > a,
+        .igv-app-dropdown-item-cloud-storage > div {
             cursor: pointer;
         }
     </style>
@@ -83,18 +84,6 @@
                     </a>
 
                     <div id="igv-app-genome-dropdown-menu" class="dropdown-menu">
-
-                        <!-- Editor -->
-                        <label class="dropdown-item btn btn-default btn-file">
-                            <div class="igv-app-dropdown-item-cloud-storage">
-                                <div>
-                                    Editor ...
-                                </div>
-                                <div>
-                                    <a href="/track-picker.html" target="_blank">Open Editor</a>
-                                </div>
-                            </div>
-                        </label>
 
                         <!-- local file -->
                         <label class="dropdown-item btn btn-default btn-file">
@@ -213,6 +202,15 @@
                     </a>
 
                     <div id="igv-session-dropdown-menu" class="dropdown-menu">
+
+                        <!-- Editor -->
+                        <label class="dropdown-item btn btn-default btn-file">
+                            <div class="igv-app-dropdown-item-cloud-storage">
+                                <div id="igv-app-editor-button">
+                                    Editor ...
+                                </div>
+                            </div>
+                        </label>
 
                         <!-- Load local session file -->
                         <label class="dropdown-item btn btn-default btn-file">
@@ -534,6 +532,10 @@
 </footer>
 
 <script>
+    document.getElementById('igv-app-editor-button').addEventListener('click', function () {
+        window.open('/track-picker.html', '_blank');
+    });
+
     document.getElementById('igv-app-edit-button').addEventListener('click', function () {
         var shareInput = document.getElementById('igv-app-share-input').value;
         var newUrl;
@@ -551,7 +553,3 @@
 </body>
 
 </html>
-
-
-</html>
-
