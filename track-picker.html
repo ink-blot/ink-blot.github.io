@@ -293,9 +293,12 @@
                 if (!blobUrlParam) {
                     throw new Error('Invalid blob URL: sessionURL parameter is missing');
                 }
-                const blobUrl = blobUrlParam.replace('blob:', '');
-                const decompressedData = uncompressString(blobUrl);
-                return JSON.parse(decompressedData);
+                const blobUrls = blobUrlParam.split('%2C').map(blobUrl => blobUrl.replace('blob:', ''));
+                const allData = await Promise.all(blobUrls.map(blobUrl => {
+                    const decompressedData = uncompressString(blobUrl);
+                    return JSON.parse(decompressedData);
+                }));
+                return allData;
             } catch (error) {
                 console.error(`Failed to process blob URL ${url}:`, error);
                 alert(`Failed to process blob URL ${url}: ${error.message}`);
@@ -304,8 +307,12 @@
 
         async function loadBlob(blob) {
             try {
-                const decompressedData = uncompressString(blob.replace('blob:', ''));
-                return JSON.parse(decompressedData);
+                const blobUrls = blob.split('%2C').map(blobUrl => blobUrl.replace('blob:', ''));
+                const allData = await Promise.all(blobUrls.map(blobUrl => {
+                    const decompressedData = uncompressString(blobUrl);
+                    return JSON.parse(decompressedData);
+                }));
+                return allData;
             } catch (error) {
                 console.error(`Failed to process blob ${blob}:`, error);
                 alert(`Failed to process blob ${blob}: ${error.message}`);
@@ -578,6 +585,17 @@
                 checkbox.checked = selectAllCheckbox.checked;
             });
         }
+
+        window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionURL = urlParams.get('sessionURL');
+            if (sessionURL) {
+                const blobs = sessionURL.split('%2C');
+                document.getElementById('urlInput').value = blobs.map(blob => `blob:${blob}`).join(', ');
+                await loadFiles();
+                alert(`Loaded ${blobs.length} blobs.`);
+            }
+        };
     </script>
 </body>
 </html>
