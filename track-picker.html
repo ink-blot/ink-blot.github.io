@@ -167,6 +167,7 @@
         <input type="file" id="jsonFiles" name="jsonFiles" accept=".json" multiple style="display: none;" onchange="displaySelectedFiles()">
     </label>
     <div id="fileList" class="file-list"></div>
+    <div id="blobFileCount" class="file-list"></div>
     <br><br>
 
     <label for="urlInput" class="centered">and/or enter comma-separated URLs or blobs:</label>
@@ -235,7 +236,7 @@
             trackDataStore = {};
 
             const fileList = document.getElementById('jsonFiles').files;
-            const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
+            const enteredURLs = document.getElementById('urlInput').value.split(/,|%2C/).map(url => url.trim()).filter(url => url);
 
             const allPromises = [];
 
@@ -243,15 +244,20 @@
                 allPromises.push(readFile(file));
             }
 
+            let blobFileCount = 0;
+
             for (const urlOrBlob of enteredURLs) {
                 if (urlOrBlob.startsWith('blob:')) {
                     allPromises.push(loadBlob(urlOrBlob.replace('blob:', '')));
+                    blobFileCount++;
                 } else {
                     // Convert regular GitHub URLs to raw content URLs
                     const rawUrl = urlOrBlob.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
                     allPromises.push(loadJSON(rawUrl));
                 }
             }
+
+            document.getElementById('blobFileCount').textContent = `Loaded ${blobFileCount} blob file(s)`;
 
             const allData = await Promise.all(allPromises);
             originalData = allData.flat().filter(data => data); // Filter out any null or undefined results
@@ -510,15 +516,36 @@
             const compressedString = compressString(JSON.stringify(sessionJson));
             const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
-            document.getElementById('blobUrlOutput').innerText = blobUrl;
-            document.getElementById('blobUrlHeader').style.display = 'block';
-        }
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.textContent = 'Open Link';
+            link.target = '_blank';
 
-        function toggleSelectAll(selectAllCheckbox) {
-            const checkboxes = document.querySelectorAll('.track-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = selectAllCheckbox.checked;
-            });
+            const copyIcon = document.createElement('span');
+            copyIcon.className = 'copy-icon';
+            copyIcon.textContent = '📋';
+            copyIcon.onclick = () => {
+                navigator.clipboard.writeText(blobUrl).then(() => {
+                    const notification = document.getElementById('copyNotification');
+                    notification.style.display = 'inline';
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                    }, 2000);
+                });
+            };
+
+            const notification = document.createElement('span');
+            notification.id = 'copyNotification';
+            notification.className = 'copy-notification';
+            notification.textContent = 'Link copied!';
+
+            const output = document.getElementById('blobUrlOutput');
+            output.innerHTML = '';
+            output.appendChild(link);
+            output.appendChild(copyIcon);
+            output.appendChild(notification);
+
+            document.getElementById('blobUrlHeader').style.display = 'block';
         }
 
         function saveSessionFile() {
@@ -545,7 +572,8 @@
             const sessionURLs = urlParams.get('sessionURL');
 
             if (sessionURLs) {
-                document.getElementById('urlInput').value = sessionURLs.split('%2C').map(url => 'blob:' + url).join(', ');
+                const urlsOrBlobs = sessionURLs.split('%2C').concat(sessionURLs.split(',')).map(url => url.trim()).filter(url => url);
+                document.getElementById('urlInput').value = urlsOrBlobs.join(', ');
                 await loadFiles();
             }
         }
