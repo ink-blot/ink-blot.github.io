@@ -245,8 +245,11 @@
             }
 
             for (const urlOrBlob of enteredURLs) {
-                if (urlOrBlob.startsWith('blob:')) {
-                    allPromises.push(loadBlob(urlOrBlob.replace(/^blob:/, '')));
+                if (urlOrBlob.startsWith('https://ink-blot.github.io/?sessionURL=blob:')) {
+                    const blobContent = urlOrBlob.replace('https://ink-blot.github.io/?sessionURL=blob:', '');
+                    allPromises.push(loadBlob(blobContent));
+                } else if (urlOrBlob.startsWith('blob:')) {
+                    allPromises.push(loadBlob(urlOrBlob.replace('blob:', '')));
                 } else {
                     // Convert regular GitHub URLs to raw content URLs
                     const rawUrl = urlOrBlob.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
@@ -271,7 +274,7 @@
             }
 
             // Update blob count
-            const blobCount = enteredURLs.filter(url => url.startsWith('blob:')).length;
+            const blobCount = enteredURLs.filter(url => url.startsWith('blob:') || url.startsWith('https://ink-blot.github.io/?sessionURL=blob:')).length;
             document.getElementById('blobCount').innerText = `Loaded ${blobCount} blob(s)`;
         }
 
@@ -515,9 +518,7 @@
             const compressedString = compressString(JSON.stringify(sessionJson));
             const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
-            // Update blob URL output
-            const blobUrlOutput = document.getElementById('blobUrlOutput');
-            blobUrlOutput.innerHTML = `<a href="${blobUrl}" target="_blank">Click link</a> <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${blobUrl}')"></i>`;
+            document.getElementById('blobUrlOutput').innerHTML = `<a href="${blobUrl}" target="_blank">Click link</a> <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${blobUrl}')"></i>`;
             document.getElementById('blobUrlHeader').style.display = 'block';
         }
 
@@ -526,24 +527,6 @@
             checkboxes.forEach(checkbox => {
                 checkbox.checked = selectAllCheckbox.checked;
             });
-        }
-
-        function copyToClipboard(text) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand("copy");
-            document.body.removeChild(textArea);
-
-            // Show copy notification
-            const copyNotification = document.createElement('div');
-            copyNotification.className = 'copy-notification';
-            copyNotification.innerText = 'Copied!';
-            document.body.appendChild(copyNotification);
-            setTimeout(() => {
-                document.body.removeChild(copyNotification);
-            }, 2000); // Hide notification after 2 seconds
         }
 
         function saveSessionFile() {
@@ -561,6 +544,27 @@
             saveNotification.style.display = 'block';
             setTimeout(() => {
                 saveNotification.style.display = 'none';
+            }, 2000); // Hide notification after 2 seconds
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            // Show copy notification
+            const copyNotification = document.createElement('div');
+            copyNotification.textContent = 'Copied!';
+            copyNotification.style.color = 'green';
+            copyNotification.style.fontSize = '14px';
+            copyNotification.style.marginLeft = '10px';
+            document.getElementById('blobUrlOutput').appendChild(copyNotification);
+
+            setTimeout(() => {
+                document.getElementById('blobUrlOutput').removeChild(copyNotification);
             }, 2000); // Hide notification after 2 seconds
         }
 
