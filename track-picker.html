@@ -1,560 +1,534 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="igv-app-html">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Picker</title>
-    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+
+    <title>IGV</title>
+
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    
+    <link rel="stylesheet" href="css/fontawesome/all.css">
+
     <!-- Bootstrap 4 CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css">
-    
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.10.20/sl-1.3.1/datatables.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/app.css">
+
+    <!-- Bootstrap 4 and Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js"></script>
+
+    <!-- Circular View -->
+    <script src="https://unpkg.com/react@16.14.0/umd/react.development.js" defer></script>
+    <script src="https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js" defer></script>
+    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view@1.6.9/dist/react-circular-genome-view.umd.production.min.js" defer></script>
+
+    <!-- Datatables JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
+
+    <!-- Google Platform JS -->
+    <script src="https://apis.google.com/js/platform.js"></script>
+
+    <!-- Google GSI -->
+    <script src="https://accounts.google.com/gsi/client"></script>
+
+    <script type="text/javascript" src="./igvwebConfig.js"></script>
+
+    <script src="./app_bundle-1.13.6.min.js"></script>
+
+    <!-- CSS to hide the track select menu of the jBrowse circular view -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 20px;
-        }
-        h1, h2 {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .table-container {
-            width: 100%;
-            margin-bottom: 20px;
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            table-layout: fixed;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border: 1px solid #ddd;
-            box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            white-space: nowrap;
-        }
-        th {
-            background-color: #f2f2f2;
-            text-align: center; /* Center column headings */
-        }
-        .scroll-box {
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        .scroll-box td {
-            width: 150px;
-        }
-        .info-box {
-            width: 100%;
-            border: 1px solid #ddd;
-            padding: 8px;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-            white-space: pre-line;
-            box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
-        }
-        .output-box {
-            width: 100%;
-            height: 300px; /* Updated height */
-            overflow: auto;
-            white-space: pre-wrap;
-            border: 1px solid #ddd;
-            padding: 8px;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-            box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
-        }
-        footer {
-            margin-top: 20px;
-            text-align: center;
-            padding: 10px;
-            background-color: #f2f2f2;
-            border-top: 1px solid #ddd;
-            width: 100%;
-        }
-        .copy-icon {
-            cursor: pointer;
-            margin-left: 10px;
-            font-size: 14px;
-            color: #007bff;
-        }
-        .copy-notification {
+        button[data-testid='circular_track_select'] {
             display: none;
-            color: green;
-            font-size: 12px;
-            margin-left: 10px;
         }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-        .btn {
-            margin-bottom: 10px;
-        }
-        .file-list {
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-        }
-        .save-notification {
-            display: none;
-            color: green;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-        .centered {
-            text-align: center;
-        }
-        .filename-group {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        .track-checkbox {
-            transform: scale(1.2);
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .output-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-        .select-all {
+        .igv-app-social-button-container > div,
+        .igv-app-social-button-container > a {
             cursor: pointer;
-            color: #007bff;
-            margin-left: 10px; /* Added margin to separate the checkbox from the text */
-        }
-        .center-button {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-        .notification-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-        .narrow-column {
-            width: 100px; /* Adjust the width as necessary */
         }
     </style>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
+
 </head>
-<body>
-    <h1>Track Picker</h1>
 
-    <h2>Load JSON Files</h2>
-    <label for="jsonFiles" class="btn btn-secondary">
-        Choose local JSON files...
-        <input type="file" id="jsonFiles" name="jsonFiles" accept=".json" multiple style="display: none;" onchange="displaySelectedFiles()">
-    </label>
-    <div id="fileList" class="file-list"></div>
-    <div id="blobCount" class="file-list"></div>
-    <br><br>
+<body class="igv-app-body-footerized">
 
-    <label for="urlInput" class="centered">and/or enter comma-separated URLs or blobs:</label>
-    <input type="text" id="urlInput" class="form-control" placeholder="Enter URLs or blobs here" style="width: 80%;">
-    <br><br>
+<nav class="navbar fixed-top py-0 navbar-expand-sm navbar-dark">
 
-    <button class="btn btn-primary" onclick="loadFiles()">Load Files</button>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#igv-app-navbar-navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-    <h2 id="trackDataHeader" style="display:none;">Track Data</h2>
-    <div id="tables-container" class="table-container"></div>
+    <div id="igv-app-navbar-navigation" class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto">
 
-    <button class="btn btn-primary" id="generateSessionButton" style="display: none;" onclick="generateSessionJson()">Generate Session JSON</button>
+            <!-- Genome -->
+            <li class="nav-item px-3">
+                <div class="dropdown">
 
-    <div id="sessionJsonSection" class="output-section" style="display: none;">
-        <h2>Session JSON Output</h2>
-        <textarea id="sessionJsonOutput" class="output-box" readonly style="width: 100%;"></textarea>
-        <br>
-        <div class="filename-group">
-            <label for="filenameInput">Filename:</label>
-            <input type="text" id="filenameInput" class="form-control" value="session.json" style="width: 40%; margin-left: 10px;">
+                    <a id="igv-app-genome-dropdown-button" class="dropdown-toggle" href="#" data-toggle="dropdown">
+                        Genome
+                    </a>
+
+                    <div id="igv-app-genome-dropdown-menu" class="dropdown-menu">
+
+                        <!-- local file -->
+                        <label class="dropdown-item btn btn-default btn-file">
+                            <div class="igv-app-dropdown-item-cloud-storage">
+                                <div>
+                                    Local File ...
+                                </div>
+                                <div>
+                                    <input id="igv-app-dropdown-local-genome-file-input" type="file" name="file"
+                                           multiple style="display: none;">
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Dropbox -->
+                        <div class="dropdown-item">
+
+                            <div id="igv-app-dropdown-dropbox-genome-file-button"
+                                 class="igv-app-dropdown-item-cloud-storage">
+
+                                <div>Dropbox</div>
+                                <div><img id="igv-app-genome-dropbox-button-image" width="18" height="18"></div>
+                                <div>...</div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Google Drive -->
+                        <div class="dropdown-item">
+                            <div id="igv-app-dropdown-google-drive-genome-file-button"
+                                 class="igv-app-dropdown-item-cloud-storage">
+                                <div>Google Drive</div>
+                                <div><img id="igv-app-genome-google-drive-button-image" width="18" height="18"></div>
+                                <div>...</div>
+                            </div>
+                        </div>
+
+                        <!-- URL -->
+                        <button class="dropdown-item" type="button" data-toggle="modal"
+                                data-target="#igv-app-genome-from-url-modal">
+                            URL ...
+                        </button>
+
+                        <div id="igv-app-genome-dropdown-divider" class="dropdown-divider"></div>
+
+                    </div>
+
+                </div>
+            </li>
+
+            <!-- Tracks -->
+            <li class="nav-item px-3">
+                <div id="igv-app-track-dropdown" class="dropdown">
+
+                    <a id="igv-track-dropdown-button" class="dropdown-toggle" href="#" data-toggle="dropdown">
+                        Tracks
+                    </a>
+
+                    <div id="igv-app-track-dropdown-menu" class="dropdown-menu">
+
+                        <!-- local file -->
+                        <label class="dropdown-item btn btn-default btn-file">
+                            <div class="igv-app-dropdown-item-cloud-storage">
+                                <div>
+                                    Local File ...
+                                </div>
+                                <div>
+                                    <input id="igv-app-dropdown-local-track-file-input" type="file" name="file" multiple
+                                           style="display: none;">
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Dropbox -->
+                        <div class="dropdown-item">
+
+                            <div id="igv-app-dropdown-dropbox-track-file-button"
+                                 class="igv-app-dropdown-item-cloud-storage">
+
+                                <div>Dropbox</div>
+                                <div><img id="igv-app-track-dropbox-button-image" width="18" height="18"></div>
+                                <div>...</div>
+                            </div>
+                        </div>
+
+                        <!-- Google Drive -->
+                        <div class="dropdown-item">
+                            <div id="igv-app-dropdown-google-drive-track-file-button"
+                                 class="igv-app-dropdown-item-cloud-storage">
+                                <div>Google Drive</div>
+                                <div><img id="igv-app-track-google-drive-button-image" width="18" height="18"></div>
+                                <div>...</div>
+                            </div>
+                        </div>
+
+                        <!-- URL -->
+                        <button class="dropdown-item" type="button" data-toggle="modal"
+                                data-target="#igv-app-track-from-url-modal">
+                            URL ...
+                        </button>
+
+                        <div id="igv-app-annotations-section" class="dropdown-divider">
+                        </div>
+
+                    </div>
+                </div>
+            </li>
+
+            <!-- Session -->
+            <li class="nav-item px-3">
+                <div class="dropdown">
+
+                    <a id="igv-app-session-dropdown-button" class="dropdown-toggle" href="#" data-toggle="dropdown">
+                        Session
+                    </a>
+
+                    <div id="igv-session-dropdown-menu" class="dropdown-menu">
+
+                        <!-- Load local session file -->
+                        <label class="dropdown-item btn btn-default btn-file">
+                            <div class="igv-app-dropdown-item-cloud-storage">
+                                <div>
+                                    Local File ...
+                                </div>
+                                <div>
+                                    <input id="igv-app-dropdown-local-session-file-input" type="file" name="file"
+                                           style="display: none;">
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Dropbox -->
+
+                        <!-- Google Drive -->
+
+                        <!-- Session URL -->
+                        <button class="dropdown-item" type="button" data-toggle="modal"
+                                data-target="#igv-app-session-url-modal">
+                            Load URL ...
+                        </button>
+
+                        <!-- Session List -->
+                        <div id="igv-session-list-divider" class="dropdown-divider"></div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <!-- Save local session file 
+                        <button class="dropdown-item" type="button" data-toggle="modal"
+                                data-target="#igv-app-session-save-modal">
+                            Save ...
+                        </button>
+            -->
+                    </div>
+
+                </div>
+            </li>
+
+            <!-- Share (generate URL) -->
+            <li class="nav-item px-3">
+                <div>
+                    <a id="igv-app-share-button" href="#" data-toggle="modal" data-target="#igv-app-share-modal">
+                        Share
+                    </a>
+                </div>
+            </li>
+
+            <!-- Bookmark -->
+            <li class="nav-item px-3">
+                <div>
+                    <a id="igv-app-bookmark-button" href="#">
+                        Bookmark
+                    </a>
+                </div>
+            </li>
+
+            <!-- Save SVG -->
+            <li class="nav-item px-3">
+                <div>
+                    <a id="igv-app-save-svg-button" href="#" data-toggle="modal" data-target="#igv-app-svg-save-modal">
+                        Save SVG
+                    </a>
+                </div>
+            </li>
+
+            <!-- Circular View -->
+            <li id="igv-app-circular-view-nav-item" class="nav-item px-3" style="display: none;">
+                <div id="igv-app-circular-view-dropdown" class="dropdown">
+
+                    <a id="igv-app-circular-view-dropdown-button" class="dropdown-toggle" href="#"
+                       data-toggle="dropdown">Circular View</a>
+
+                    <div id="igv-app-circular-view-dropdown-menu" class="dropdown-menu">
+
+                        <button id="igv-app-circular-view-presentation-button" class="dropdown-item" type="button">
+                            Show
+                        </button>
+
+                        <button id="igv-app-circular-view-clear-chords-button" class="dropdown-item" type="button"
+                                disabled>
+                            Clear All
+                        </button>
+
+                        <button id="igv-app-circular-view-resize-button" class="dropdown-item" type="button" disabled
+                                data-toggle="modal" data-target="#igv-app-circular-view-resize-modal">
+                            Resize
+                        </button>
+
+                        <a id="igv-app-circular-view-example-button" class="dropdown-item" type="button"
+                           href="https://github.com/igvteam/igv-webapp/wiki/Circular-View"
+                           target="_blank">Documentation</a>
+
+                    </div>
+
+                </div>
+            </li>
+
+            <!-- Help Menu -->
+            <li class="nav-item px-3">
+                <div id="igv-app-help-dropdown" class="dropdown">
+
+                    <a id="igv-app-help-button" class="dropdown-toggle" href="#" data-toggle="dropdown">
+                        Help
+                    </a>
+
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="https://igvteam.github.io/igv-webapp/" target="_blank">Documentation</a>
+                        <a class="dropdown-item" href="https://github.com/igvteam/igv-webapp" target="_blank">GitHub
+                            Repository</a>
+                        <a class="dropdown-item" href="https://groups.google.com/group/igv-help" target="_blank">User
+                            Forum</a>
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#igv-app-help-about-modal">About
+                            IGV-Web</a>
+                    </div>
+                </div>
+            </li>
+
+        </ul>
+
+        <!-- Google Authentication -->
+        <div class="btn-group">
+            <div class="btn-group dropleft" role="group">
+
+                <div id="igv-google-drive-dropdown" class="dropdown">
+
+                    <button id="igv-google-drive-dropdown-toggle" type="button" class="btn dropdown-toggle" data-toggle="dropdown" style="display: none;">
+                        <img src="img/google-drive-current.png" width="24" height="24">
+                    </button>
+
+                    <div class="dropdown-menu">
+                        <button id="igv-google-drive-sign-out-button" class="dropdown-item" type="button">
+                        </button>
+                    </div>
+                </div>
+
+            </div>
         </div>
-        <div class="center-button">
-            <button class="btn btn-secondary" id="SaveSessionFile" style="display: inline-block;" onclick="saveSessionFile()">Save Session File</button>
-        </div>
-        <div class="notification-container">
-            <div id="saveNotification" class="save-notification">File saved as: session.json</div>
+
+    </div>
+
+</nav>
+
+<main id="igv-main" role="main" class="container-fluid">
+
+    <!-- JBrowser Circular Viewer Container -->
+    <div id="igv-circular-view-container"
+         style="position: absolute; top:200px; left:20px; width: fit-content; height: fit-content;z-index: 2048"></div>
+
+    <!-- App container -->
+    <div class="row">
+        <div class="col-sm">
+            <div id="igv-app-container">
+            </div>
         </div>
     </div>
 
-    <h2 id="blobUrlHeader" style="display:none;">Blob URL</h2>
-    <div id="blobUrlOutput" class="centered"></div>
+    <!-- Share URL Modal -->
+    <div id="igv-app-share-modal" class="modal fade">
 
-    <footer></footer>
+        <div class="modal-dialog">
 
-    <script>
-        const mode = 'secure'; //'secure' or 'default'
-        let originalData = [];
-        let trackDataStore = {};
+            <div class="modal-content">
 
-        async function loadJSON(url) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error(`Failed to fetch JSON from ${url}:`, error);
-                alert(`Failed to fetch JSON from ${url}: ${error.message}`);
-            }
-        }
+                <div class="modal-header">
+                    <div id="igv-app-share-input-modal-close-button" class="modal-title">Share</div>
 
-        function readFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(JSON.parse(reader.result));
-                reader.onerror = error => reject(error);
-                reader.readAsText(file);
-            });
-        }
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
 
-        async function loadFiles() {
-            const tablesContainer = document.getElementById('tables-container');
-            tablesContainer.innerHTML = '';
-            originalData = [];
-            trackDataStore = {};
+                </div>
 
-            const fileList = document.getElementById('jsonFiles').files;
-            const enteredURLs = document.getElementById('urlInput').value.split(/,|%2C/).map(url => url.trim()).filter(url => url);
+                <div class="modal-body">
+                    <div class="container-fluid">
 
-            const allPromises = [];
+                        <!-- copy url -->
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <div class="form-group">
+                                    <input id="igv-app-share-input" type="text" class="form-control" placeholder="">
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <button id="igv-app-copy-link-button" type="button" class="btn btn-sm btn-default">
+                                    COPY
+                                </button>
+                            </div>
+                        </div>
 
-            for (const file of fileList) {
-                allPromises.push(readFile(file));
-            }
+                        <!-- social buttons -->
+                        <div class="igv-app-social-button-container">
 
-            for (const urlOrBlob of enteredURLs) {
-                if (urlOrBlob.startsWith('blob:')) {
-                    allPromises.push(loadBlob(urlOrBlob.replace(/^blob:/, '')));
-                } else {
-                    // Convert regular GitHub URLs to raw content URLs
-                    const rawUrl = urlOrBlob.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
-                    allPromises.push(loadJSON(rawUrl));
-                }
-            }
+                            <div>
+                                <a id="igv-app-email-button" href="mailto:?body=https://ink-blot.github.io/?sessionURL=blob:rZNbb9owFMe_CvLTJmVOzKVZeGO06h5WNoGqdqqq6ZCYxCKxmW1IKeK779imF2nV2mrk4R_Fx.d3rtmRDddGKEmGpEvZgA5IREyl2hk0q5pPoOGGDBdQGx4RzRdcc5lzMtwRUaBLVbIMHSRew6.v6wZk58P5dFz10tjZPqJxAcbC5fSbu27tygzj2PQoNHCvJLSG5qqJRbmhc62gENJYYdeWU6XLuORSYQKx4b89zgv1QAQLWfC7o4NRBcLzrVVzkMWR.A73BXHU3lmkQy3AvAGNLPrAeszzl_emFuYuz0qrRhm88V0XXCMQT1jUQe167Xntex14PfGaev3sNfPKkvAK3iy4s.DPAoAFAgsIFhgsQFigdAOle8ghUK69_iT7iNQqX.NKYQtqTF8rQYY3txGxGvIlnt_siN2u3DZh79Z.2SKiQmmfsiRJWZZ1B_20n2QZ20e7h927HM_GHSNV3IjpZNRBpwMGpFQWrFtx3EWlG7B42pZauh0qhFnVsL1Qhbt7dv1jNDk9O0XDWtfvHs5TKBO35VSCmzYt7xFXcVFWGDhNHqsZPMv._Go0ey3lsgWTg4Valf9KfCOMmIta2O0V_iCqxbax_y_HBR.H4E9FvfUHfCeZ2rl4uWUnz1o25SsOtnMBZommV3qnG7M89rQd8wi9eIY5FP73BFninxd7ku5v938A">EMAIL</a>
+                            </div>
 
-            const allData = await Promise.all(allPromises);
-            originalData = allData.flat().filter(data => data); // Filter out any null or undefined results
+                            <div id="igv-app-embed-button">EMBED</div>
 
-            originalData.forEach((data, dataIndex) => {
-                if (data.reference && data.tracks) {
-                    processSessionJSON(data, dataIndex);
-                } else {
-                    processGenomeJSON(data, dataIndex);
-                }
-            });
+                            <div id="igv-app-qrcode-button">QR CODE</div>
 
-            if (originalData.length > 0) {
-                document.getElementById('trackDataHeader').style.display = 'block';
-                document.getElementById('generateSessionButton').style.display = 'inline-block';
-            }
+                            <div id="igv-app-edit-button">EDIT</div>
 
-            // Update blob count
-            const blobCount = enteredURLs.filter(url => url.startsWith('blob:')).length;
-            document.getElementById('blobCount').innerText = `Loaded ${blobCount} blob(s)`;
-        }
+                        </div>
 
-        function uncompressString(enc) {
-            enc = enc.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=');
-            const compressedString = atob(enc);
-            const compressedBytes = [];
-            for (let i = 0; i < compressedString.length; i++) {
-                compressedBytes.push(compressedString.charCodeAt(i));
-            }
-            const bytes = pako.inflateRaw(new Uint8Array(compressedBytes));
-            let str = '';
-            for (let b of bytes) {
-                str += String.fromCharCode(b);
-            }
-            return str;
-        }
+                        <!-- qr code image -->
+                        <div class="row justify-content-center">
+                            <div id="igv-app-qrcode-image" class="col-4"></div>
+                        </div>
 
-        async function loadBlob(blobContent) {
-            try {
-                const decompressedData = uncompressString(blobContent);
-                return JSON.parse(decompressedData);
-            } catch (error) {
-                console.error(`Failed to process blob:`, error);
-                alert(`Failed to process blob: ${error.message}`);
-            }
-        }
+                        <!-- embed widget -->
+                        <div id="igv-app-embed-container" class="row">
+                            <div class="col-sm-9 form-group">
+                                <textarea class="form-control" rows="4"></textarea>
+                            </div>
+                            <div class="col-sm-3">
+                                <button type="button" class="btn btn-default">COPY</button>
+                            </div>
+                        </div>
 
-        function processSessionJSON(data, dataIndex) {
-            const table = document.createElement('table');
+                    </div>
+                </div>
 
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr>
-                    <th>Track Name</th>
-                    <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>' : ''}
-                </tr>
-            `;
-            table.appendChild(thead);
+            </div>
 
-            const tbody = document.createElement('tbody');
+        </div>
 
-            // Add reference row
-            const referenceData = JSON.stringify(data.reference);
-            const refRow = document.createElement('tr');
-            refRow.innerHTML = `
-                <td>Reference</td>
-                <td></td>
-                ${mode === 'default' ? `
-                <td class="scroll-box">${data.reference.fastaURL}</td>
-                <td class="scroll-box">${data.reference.indexURL}</td>
-                <td class="scroll-box">${referenceData}</td>
-                ` : ''}
-            `;
-            tbody.appendChild(refRow);
+    </div>
 
-            data.tracks.forEach((track, index) => {
-                if (track.url) {
-                    const row = document.createElement('tr');
-                    const trackId = `track-${dataIndex}-${index}`;
-                    trackDataStore[trackId] = {
-                        trackURL: track.url || '',
-                        indexURL: track.indexURL || '',
-                        trackData: JSON.stringify(track),
-                        fastaURL: data.reference.fastaURL,
-                        reference: data.reference
-                    };
+    <!-- SVG save -->
+    <div id="igv-app-svg-save-modal" class="modal fade igv-app-file-save-modal">
 
-                    row.innerHTML = `
-                        <td class="scroll-box">${track.name || track.filename}</td>
-                        <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                        ${mode === 'default' ? `
-                        <td class="scroll-box">${track.url}</td>
-                        <td class="scroll-box">${track.indexURL || ''}</td>
-                        <td class="scroll-box">${JSON.stringify(track)}</td>
-                        ` : ''}
-                    `;
-                    tbody.appendChild(row);
-                }
-            });
+        <div class="modal-dialog modal-lg">
 
-            table.appendChild(tbody);
-            document.getElementById('tables-container').appendChild(table);
-        }
+            <div class="modal-content">
 
-        function processGenomeJSON(genome, dataIndex) {
-            const table = document.createElement('table');
+                <div class="modal-header">
 
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr>
-                    <th>Track Name</th>
-                    <th class="narrow-column">Select<br><input type="checkbox" class="select-all" onclick="toggleSelectAll(this)" style="transform: scale(1.2); margin: 0;"></th>
-                    ${mode === 'default' ? '<th>Track URLs</th><th>Index URLs</th><th>Track Data</th>' : ''}
-                </tr>
-            `;
-            table.appendChild(thead);
+                    <div id="igv-app-svg-save-modal-label" class="modal-title">
+                        <div>
+                            Save SVG File
+                        </div>
+                    </div>
 
-            const tbody = document.createElement('tbody');
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
-            // Add reference row
-            const referenceData = JSON.stringify({
-                id: genome.id,
-                name: genome.name,
-                fastaURL: genome.fastaURL,
-                indexURL: genome.indexURL,
-                cytobandURL: genome.cytobandURL,
-                aliasURL: genome.aliasURL
-            });
-            const refRow = document.createElement('tr');
-            refRow.innerHTML = `
-                <td>Reference</td>
-                <td></td>
-                ${mode === 'default' ? `
-                <td class="scroll-box">${genome.fastaURL}</td>
-                <td class="scroll-box">${genome.indexURL}</td>
-                <td class="scroll-box">${referenceData}</td>
-                ` : ''}
-            `;
-            tbody.appendChild(refRow);
+                <div class="modal-body">
+                    <input class="form-control" type="text" placeholder="igv-app.svg">
 
-            genome.tracks.forEach((track, index) => {
-                const row = document.createElement('tr');
-                const trackId = `track-${dataIndex}-${index}`;
-                trackDataStore[trackId] = {
-                    trackURL: track.url || '',
-                    indexURL: track.indexURL || '',
-                    trackData: JSON.stringify(track),
-                    fastaURL: genome.fastaURL,
-                    reference: {
-                        id: genome.id,
-                        name: genome.name,
-                        fastaURL: genome.fastaURL,
-                        indexURL: genome.indexURL,
-                        cytobandURL: genome.cytobandURL,
-                        aliasURL: genome.aliasURL,
-                        chromosomeOrder: genome.chromosomeOrder
-                    }
-                };
+                    <div>
+                        Enter filename with .svg suffix
+                    </div>
 
-                row.innerHTML = `
-                    <td class="scroll-box">${track.name}</td>
-                    <td class="narrow-column"><input type="checkbox" class="track-checkbox" id="${trackId}" style="transform: scale(1.2); margin: auto;"></td>
-                    ${mode === 'default' ? `
-                    <td class="scroll-box">${track.url}</td>
-                    <td class="scroll-box">${track.indexURL || ''}</td>
-                    <td class="scroll-box">${JSON.stringify(track)}</td>
-                    ` : ''}
-                `;
-                tbody.appendChild(row);
-            });
+                </div>
 
-            table.appendChild(tbody);
-            document.getElementById('tables-container').appendChild(table);
-        }
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-secondary">OK</button>
+                </div>
 
-        function displaySelectedFiles() {
-            const fileList = document.getElementById('jsonFiles').files;
-            const fileListDiv = document.getElementById('fileList');
-            fileListDiv.innerHTML = '';
+            </div>
 
-            for (const file of fileList) {
-                const fileItem = document.createElement('div');
-                fileItem.textContent = file.name;
-                fileListDiv.appendChild(fileItem);
-            }
-        }
+        </div>
 
-        function compressString(str) {
-            const bytes = new Uint8Array(str.length);
-            for (let i = 0; i < str.length; i++) {
-                bytes[i] = str.charCodeAt(i);
-            }
-            const compressedBytes = pako.deflateRaw(bytes);
-            const compressedString = String.fromCharCode.apply(null, compressedBytes);
-            let enc = btoa(compressedString);
-            return enc.replace(/\+/g, '.').replace(/\//g, '_').replace(/=/g, '-');
-        }
+    </div>
 
-        function generateSessionJson() {
-            console.log('Generate Session JSON button clicked');
-            const checkboxes = document.querySelectorAll('.track-checkbox:checked');
-            console.log('Selected checkboxes:', checkboxes);
-            const selectedTracks = Array.from(checkboxes).map(checkbox => {
-                const trackId = checkbox.id;
-                console.log('Selected track ID:', trackId);
-                return JSON.parse(trackDataStore[trackId].trackData);
-            });
+    <!-- Help - About - Modal -->
+    <div id="igv-app-help-about-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About IGV-Web</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="igv-app-version"></div>
+                    <div id="igv-igvjs-version"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            if (selectedTracks.length === 0) {
-                alert('No tracks selected.');
-                return;
-            }
+</main>
 
-            const uniqueFastaURLs = new Set();
-            const trackGroups = {};
+<footer class="igv-app-footer">
 
-            checkboxes.forEach(checkbox => {
-                const trackId = checkbox.id;
-                const { trackURL, fastaURL, reference } = trackDataStore[trackId];
+    <div>
+        <a href="https://igv.org" target="_blank">
+            <img src="img/igv-logo-cooked-40x40.png" width="32" height="32">&nbsp;&nbsp;igv.org
+        </a>
+    </div>
 
-                uniqueFastaURLs.add(fastaURL);
+    <div id="igv-version-label">
+    </div>
 
-                if (!trackGroups[trackURL]) {
-                    trackGroups[trackURL] = [];
-                }
-                trackGroups[trackURL].push(JSON.parse(trackDataStore[trackId].trackData));
+    <div>
+        <div id="igv-app-ucsd-logo">
+            <a href="https://ucsd.edu/" target="_blank" title="University of California at San Diego">
+                <img src="img/ucsd-logo.svg" width="123" height="24" alt="University of California at San Diego">
+            </a>
+        </div>
+        <div id="igv-app-broad-logo">
+            <a href="https://www.broadinstitute.org" target="_blank" title="Broad Institute home page">
+                <img src="https://igv.org/app/img/broad-institute-logo.svg" width="95" height="24"
+                     alt="Broad Institute logo">
+            </a>
+        </div>
+    </div>
 
-                // Ensure reference is set correctly
-                if (uniqueFastaURLs.size === 1) {
-                    selectedReference = reference;
-                }
-            });
+</footer>
 
-            if (uniqueFastaURLs.size > 1) {
-                alert('Tracks from different references cannot be combined.');
-                return;
-            }
+<script>
+    document.getElementById('igv-app-edit-button').addEventListener('click', function () {
+        var shareInput = document.getElementById('igv-app-share-input').value;
+        var newUrl = shareInput.replace('?', '/track-picker.html?');
+        window.location.href = newUrl;
+    });
+</script>
 
-            if (!selectedReference) {
-                alert('Reference not found for the selected tracks.');
-                return;
-            }
-
-            const sessionJson = {
-                version: "2.15.11",
-                showSampleNames: false,
-                reference: selectedReference,
-                locus: "all",
-                roi: [],
-                tracks: Object.values(trackGroups).flat()
-            };
-
-            if (mode === 'default') {
-                document.getElementById('sessionJsonOutput').textContent = JSON.stringify(sessionJson, null, 2);
-                document.getElementById('sessionJsonSection').style.display = 'block';
-            }
-
-            // Generate blob URL from session JSON
-            const compressedString = compressString(JSON.stringify(sessionJson));
-            const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
-
-            document.getElementById('blobUrlOutput').innerText = blobUrl;
-            document.getElementById('blobUrlHeader').style.display = 'block';
-        }
-
-        function toggleSelectAll(selectAllCheckbox) {
-            const checkboxes = document.querySelectorAll('.track-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = selectAllCheckbox.checked;
-            });
-        }
-
-        function saveSessionFile() {
-            const blob = new Blob([document.getElementById('sessionJsonOutput').value], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = document.getElementById('filenameInput').value || 'session.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // Show save notification
-            const saveNotification = document.getElementById('saveNotification');
-            saveNotification.style.display = 'block';
-            setTimeout(() => {
-                saveNotification.style.display = 'none';
-            }, 2000); // Hide notification after 2 seconds
-        }
-
-        // Automatically load files if sessionURL parameter is present in the URL
-        window.onload = async function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionURLs = urlParams.get('sessionURL');
-
-            if (sessionURLs) {
-                const processedURLs = sessionURLs.split(/,|%2C/).map(url => url.trim());
-                document.getElementById('urlInput').value = processedURLs.join(', ');
-                await loadFiles();
-            }
-        }
-    </script>
 </body>
+
 </html>
