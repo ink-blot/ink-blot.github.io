@@ -169,8 +169,8 @@
     <div id="fileList" class="file-list"></div>
     <br><br>
 
-    <label for="urlInput" class="centered">and/or enter comma-separated URLs:</label>
-    <input type="text" id="urlInput" class="form-control" placeholder="Enter URLs here" style="width: 80%;">
+    <label for="urlInput" class="centered">and/or enter comma-separated URLs or blobs:</label>
+    <input type="text" id="urlInput" class="form-control" placeholder="Enter URLs or blobs here" style="width: 80%;">
     <br><br>
 
     <button class="btn btn-primary" onclick="loadFiles()">Load Files</button>
@@ -243,12 +243,14 @@
                 allPromises.push(readFile(file));
             }
 
-            for (const url of enteredURLs) {
-                if (url.includes('sessionURL=blob:')) {
-                    allPromises.push(loadBlobURL(url));
+            for (const urlOrBlob of enteredURLs) {
+                if (urlOrBlob.includes('sessionURL=blob:')) {
+                    allPromises.push(loadBlobURL(urlOrBlob));
+                } else if (urlOrBlob.startsWith('blob:')) {
+                    allPromises.push(loadBlob(urlOrBlob));
                 } else {
                     // Convert regular GitHub URLs to raw content URLs
-                    const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+                    const rawUrl = urlOrBlob.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
                     allPromises.push(loadJSON(rawUrl));
                 }
             }
@@ -297,6 +299,16 @@
             } catch (error) {
                 console.error(`Failed to process blob URL ${url}:`, error);
                 alert(`Failed to process blob URL ${url}: ${error.message}`);
+            }
+        }
+
+        async function loadBlob(blob) {
+            try {
+                const decompressedData = uncompressString(blob.replace('blob:', ''));
+                return JSON.parse(decompressedData);
+            } catch (error) {
+                console.error(`Failed to process blob ${blob}:`, error);
+                alert(`Failed to process blob ${blob}: ${error.message}`);
             }
         }
 
