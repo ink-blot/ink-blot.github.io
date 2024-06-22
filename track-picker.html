@@ -167,11 +167,10 @@
         <input type="file" id="jsonFiles" name="jsonFiles" accept=".json" multiple style="display: none;" onchange="displaySelectedFiles()">
     </label>
     <div id="fileList" class="file-list"></div>
-    <div id="blobFileCount" class="file-list"></div>
     <br><br>
 
-    <label for="urlInput" class="centered">and/or enter comma-separated URLs or blobs:</label>
-    <input type="text" id="urlInput" class="form-control" placeholder="Enter URLs or blobs here" style="width: 80%;">
+    <label for="urlInput" class="centered">and/or enter comma-separated URLs:</label>
+    <input type="text" id="urlInput" class="form-control" placeholder="Enter URLs here" style="width: 80%;">
     <br><br>
 
     <button class="btn btn-primary" onclick="loadFiles()">Load Files</button>
@@ -236,7 +235,7 @@
             trackDataStore = {};
 
             const fileList = document.getElementById('jsonFiles').files;
-            const enteredURLs = document.getElementById('urlInput').value.split(/,|%2C/).map(url => url.trim()).filter(url => url);
+            const enteredURLs = document.getElementById('urlInput').value.split(/[,%2C]/).map(url => url.trim()).filter(url => url);
 
             const allPromises = [];
 
@@ -244,20 +243,15 @@
                 allPromises.push(readFile(file));
             }
 
-            let blobFileCount = 0;
-
-            for (const urlOrBlob of enteredURLs) {
-                if (urlOrBlob.startsWith('blob:')) {
-                    allPromises.push(loadBlob(urlOrBlob.replace('blob:', '')));
-                    blobFileCount++;
+            for (const url of enteredURLs) {
+                if (url.includes('sessionURL=blob:')) {
+                    allPromises.push(loadBlobURL(url));
                 } else {
                     // Convert regular GitHub URLs to raw content URLs
-                    const rawUrl = urlOrBlob.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+                    const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
                     allPromises.push(loadJSON(rawUrl));
                 }
             }
-
-            document.getElementById('blobFileCount').textContent = `Loaded ${blobFileCount} blob file(s)`;
 
             const allData = await Promise.all(allPromises);
             originalData = allData.flat().filter(data => data); // Filter out any null or undefined results
@@ -274,6 +268,13 @@
                 document.getElementById('trackDataHeader').style.display = 'block';
                 document.getElementById('generateSessionButton').style.display = 'inline-block';
             }
+
+            // Update loaded blob count
+            const loadedBlobCount = enteredURLs.length;
+            const fileListDiv = document.getElementById('fileList');
+            const blobCountDiv = document.createElement('div');
+            blobCountDiv.textContent = `${loadedBlobCount} blob files loaded`;
+            fileListDiv.appendChild(blobCountDiv);
         }
 
         function uncompressString(enc) {
@@ -291,13 +292,18 @@
             return str;
         }
 
-        async function loadBlob(blobContent) {
+        async function loadBlobURL(url) {
             try {
-                const decompressedData = uncompressString(blobContent);
+                const blobUrlParam = new URL(url).searchParams.get('sessionURL');
+                if (!blobUrlParam) {
+                    throw new Error('Invalid blob URL: sessionURL parameter is missing');
+                }
+                const blobUrl = blobUrlParam.replace('blob:', '');
+                const decompressedData = uncompressString(blobUrl);
                 return JSON.parse(decompressedData);
             } catch (error) {
-                console.error(`Failed to process blob:`, error);
-                alert(`Failed to process blob: ${error.message}`);
+                console.error(`Failed to process blob URL ${url}:`, error);
+                alert(`Failed to process blob URL ${url}: ${error.message}`);
             }
         }
 
@@ -549,34 +555,34 @@
         }
 
         function saveSessionFile() {
-            const blob = new Blob([document.getElementById('sessionJsonOutput').value], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = document.getElementById('filenameInput').value || 'session.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // Show save notification
-            const saveNotification = document.getElementById('saveNotification');
-            saveNotification.style.display = 'block';
-            setTimeout(() => {
-                saveNotification.style.display = 'none';
-            }, 2000); // Hide notification after 2 seconds
+            const sessionJson = document.getElementById('sessionJsonOutput').textContent;
+            const blob = new Blob([sessionJson], { type: "application/json" });
+            const filename = document.getElementById('filenameInput').value;
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            document.getElementById('saveNotification').textContent = `File saved as: ${filename}`;
+            document.getElementById('saveNotification').style.display = 'block';
         }
 
-        // Automatically load files if sessionURL parameter is present in the URL
-        window.onload = async function() {
+        function toggleSelectAll(selectAllCheckbox) {
+            const table = selectAllCheckbox.closest('table');
+            const checkboxes = table.querySelectorAll('.track-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const sessionURLs = urlParams.get('sessionURL');
-
             if (sessionURLs) {
-                const urlsOrBlobs = sessionURLs.split('%2C').concat(sessionURLs.split(',')).map(url => url.trim()).filter(url => url);
-                document.getElementById('urlInput').value = urlsOrBlobs.join(', ');
-                await loadFiles();
+                const urls = sessionURLs.split(/[%2C,]+/).map(url => 'blob:' + url.trim());
+                document.getElementById('urlInput').value = urls.join(', ');
+                loadFiles();
             }
-        }
+        };
     </script>
 </body>
 </html>
