@@ -56,8 +56,7 @@
             display: none;
         }
         .igv-app-social-button-container > div,
-        .igv-app-social-button-container > a,
-        .igv-app-dropdown-item-cloud-storage > div {
+        .igv-app-social-button-container > a {
             cursor: pointer;
         }
         .dropdown-item.btn {
@@ -207,13 +206,9 @@
                     <div id="igv-session-dropdown-menu" class="dropdown-menu">
 
                         <!-- Editor -->
-                        <label class="dropdown-item btn btn-default btn-file">
-                            <div class="igv-app-dropdown-item-cloud-storage">
-                                <div id="igv-app-editor-button">
-                                    Editor ...
-                                </div>
-                            </div>
-                        </label>
+                        <div class="dropdown-item" id="igv-app-editor-button" style="cursor: pointer;">
+                            Editor ...
+                        </div>
 
                         <!-- Load local session file -->
                         <label class="dropdown-item btn btn-default btn-file">
