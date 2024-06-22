@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <meta http-equiv=“Pragma” content=”no-cache”>
-    <meta http-equiv=“Expires” content=”-1″>
-    <meta http-equiv=“CACHE-CONTROL” content=”NO-CACHE”>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
 
     <title>IGV</title>
 
@@ -48,7 +48,7 @@
 
     <script type="text/javascript" src="./igvwebConfig.js"></script>
 
-	<script src=./app_bundle-1.13.6.min.js></script>
+    <script src="./app_bundle-1.13.6.min.js"></script>
 
     <!-- CSS to hide the track select menu of the jBrowse circular view -->
     <style>
@@ -231,7 +231,7 @@
                                 data-target="#igv-app-session-save-modal">
                             Save ...
                         </button>
-			-->
+            -->
                     </div>
 
                 </div>
@@ -271,7 +271,7 @@
                     <a id="igv-app-circular-view-dropdown-button" class="dropdown-toggle" href="#"
                        data-toggle="dropdown">Circular View</a>
 
-                    <div id="igv-app-circular-view-dropdown-menu" class="dropdown-menu">
+                    <div id="igv-app-circular-view-dropdown-menu">
 
                         <button id="igv-app-circular-view-presentation-button" class="dropdown-item" type="button">
                             Show
@@ -392,12 +392,14 @@
                         <div class="igv-app-social-button-container">
 
                             <div>
-                                <a id="igv-app-email-button" href="mailto:?body=https://aidenlab.org/juicebox">EMAIL</a>
+                                <a id="igv-app-email-button" href="mailto:?body=https://ink-blot.github.io/?sessionURL=blob:rZNbb9owFMe_CvLTJmVOzKVZeGO06h5WNoGqdqqq6ZCYxCKxmW1IKeK779imF2nV2mrk4R_Fx.d3rtmRDddGKEmGpEvZgA5IREyl2hk0q5pPoOGGDBdQGx4RzRdcc5lzMtwRUaBLVbIMHSRew6.v6wZk58P5dFz10tjZPqJxAcbC5fSbu27tygzj2PQoNHCvJLSG5qqJRbmhc62gENJYYdeWU6XLuORSYQKx4b89zgv1QAQLWfC7o4NRBcLzrVVzkMWR.A73BXHU3lmkQy3AvAGNLPrAeszzl_emFuYuz0qrRhm88V0XXCMQT1jUQe167Xntex14PfGaev3sNfPKkvAK3iy4s.DPAoAFAgsIFhgsQFigdAOle8ghUK69_iT7iNQqX.NKYQtqTF8rQYY3txGxGvIlnt_siN2u3DZh79Z.2SKiQmmfsiRJWZZ1B_20n2QZ20e7h927HM_GHSNV3IjpZNRBpwMGpFQWrFtx3EWlG7B42pZauh0qhFnVsL1Qhbt7dv1jNDk9O0XDWtfvHs5TKBO35VSCmzYt7xFXcVFWGDhNHqsZPMv._Go0ey3lsgWTg4Valf9KfCOMmIta2O0V_iCqxbax_y_HBR.H4E9FvfUHfCeZ2rl4uWUnz1o25SsOtnMBZommV3qnG7M89rQd8wi9eIY5FP73BFninxd7ku5v938A">EMAIL</a>
                             </div>
 
                             <div id="igv-app-embed-button">EMBED</div>
 
                             <div id="igv-app-qrcode-button">QR CODE</div>
+
+                            <div id="igv-app-edit-button">EDIT</div>
 
                         </div>
 
@@ -514,6 +516,14 @@
     </div>
 
 </footer>
+
+<script>
+    document.getElementById('igv-app-edit-button').addEventListener('click', function () {
+        var shareInput = document.getElementById('igv-app-share-input').value;
+        var newUrl = shareInput.replace('?', '/track-picker.html?');
+        window.location.href = newUrl;
+    });
+</script>
 
 </body>
 
