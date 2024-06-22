@@ -515,7 +515,12 @@
             const compressedString = compressString(JSON.stringify(sessionJson));
             const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
-            document.getElementById('blobUrlOutput').innerText = blobUrl;
+            const blobLink = document.createElement('a');
+            blobLink.href = blobUrl;
+            blobLink.innerText = blobUrl;
+            blobLink.target = "_blank";  // Open in a new tab
+            document.getElementById('blobUrlOutput').innerHTML = '';  // Clear previous content
+            document.getElementById('blobUrlOutput').appendChild(blobLink);
             document.getElementById('blobUrlHeader').style.display = 'block';
         }
 
