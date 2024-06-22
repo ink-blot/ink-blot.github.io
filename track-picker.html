@@ -236,7 +236,7 @@
             trackDataStore = {};
 
             const fileList = document.getElementById('jsonFiles').files;
-            const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
+            const enteredURLs = document.getElementById('urlInput').value.split(/[,]|%2C/).map(url => url.trim()).filter(url => url);
 
             const allPromises = [];
 
@@ -268,11 +268,8 @@
             if (originalData.length > 0) {
                 document.getElementById('trackDataHeader').style.display = 'block';
                 document.getElementById('generateSessionButton').style.display = 'inline-block';
+                document.getElementById('blobCount').textContent = `Blobs loaded: ${enteredURLs.length}`;
             }
-
-            // Display blob count
-            const blobCount = enteredURLs.filter(url => url.startsWith('blob:')).length;
-            document.getElementById('blobCount').innerText = `${blobCount} blob(s) loaded.`;
         }
 
         function uncompressString(enc) {
@@ -550,8 +547,7 @@
             const sessionURLs = urlParams.get('sessionURL');
 
             if (sessionURLs) {
-                const formattedURLs = sessionURLs.split('%2C').map(url => url.startsWith('blob:') ? url : 'blob:' + url).join(', ');
-                document.getElementById('urlInput').value = formattedURLs;
+                document.getElementById('urlInput').value = sessionURLs.split('%2C').map(url => 'blob:' + url).join(', ');
                 await loadFiles();
             }
         }
