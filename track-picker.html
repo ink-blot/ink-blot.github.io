@@ -285,32 +285,11 @@
             return str;
         }
 
-        async function loadBlobURL(url) {
-            try {
-                const blobUrlParam = new URL(url).searchParams.get('sessionURL');
-                if (!blobUrlParam) {
-                    throw new Error('Invalid blob URL: sessionURL parameter is missing');
-                }
-                const blobs = blobUrlParam.split('%2C');
-                const allData = await Promise.all(blobs.map(blob => {
-                    const decompressedData = uncompressString(blob.replace('blob:', ''));
-                    return JSON.parse(decompressedData);
-                }));
-                return allData.flat();
-            } catch (error) {
-                console.error(`Failed to process blob URL ${url}:`, error);
-                alert(`Failed to process blob URL ${url}: ${error.message}`);
-            }
-        }
-
         async function loadBlob(blob) {
             try {
-                const blobs = blob.split('%2C');
-                const allData = await Promise.all(blobs.map(blob => {
-                    const decompressedData = uncompressString(blob.replace('blob:', ''));
-                    return JSON.parse(decompressedData);
-                }));
-                return allData.flat();
+                const blobContent = blob.replace('blob:', '');
+                const decompressedData = uncompressString(blobContent);
+                return JSON.parse(decompressedData);
             } catch (error) {
                 console.error(`Failed to process blob ${blob}:`, error);
                 alert(`Failed to process blob ${blob}: ${error.message}`);
@@ -588,8 +567,8 @@
             const urlParams = new URLSearchParams(window.location.search);
             const sessionURL = urlParams.get('sessionURL');
             if (sessionURL) {
-                const blobs = sessionURL.split('%2C');
-                document.getElementById('urlInput').value = blobs.map(blob => `blob:${blob}`).join(', ');
+                const blobs = sessionURL.split('%2C').map(blob => `blob:${blob}`);
+                document.getElementById('urlInput').value = blobs.join(', ');
                 await loadFiles();
                 alert(`Loaded ${blobs.length} blobs.`);
             }
