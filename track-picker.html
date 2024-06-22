@@ -515,7 +515,9 @@
             const compressedString = compressString(JSON.stringify(sessionJson));
             const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
-            document.getElementById('blobUrlOutput').innerHTML = `<a href="${blobUrl}" target="_blank">Click link</a> <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${blobUrl}')"></i>`;
+            // Update blob URL output
+            const blobUrlOutput = document.getElementById('blobUrlOutput');
+            blobUrlOutput.innerHTML = `<a href="${blobUrl}" target="_blank">Click link</a> <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${blobUrl}')"></i>`;
             document.getElementById('blobUrlHeader').style.display = 'block';
         }
 
@@ -524,6 +526,24 @@
             checkboxes.forEach(checkbox => {
                 checkbox.checked = selectAllCheckbox.checked;
             });
+        }
+
+        function copyToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+
+            // Show copy notification
+            const copyNotification = document.createElement('div');
+            copyNotification.className = 'copy-notification';
+            copyNotification.innerText = 'Copied!';
+            document.body.appendChild(copyNotification);
+            setTimeout(() => {
+                document.body.removeChild(copyNotification);
+            }, 2000); // Hide notification after 2 seconds
         }
 
         function saveSessionFile() {
@@ -544,23 +564,6 @@
             }, 2000); // Hide notification after 2 seconds
         }
 
-        function copyToClipboard(text) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand("copy");
-            document.body.removeChild(textArea);
-
-            const notification = document.createElement('div');
-            notification.textContent = 'Link copied to clipboard!';
-            notification.className = 'copy-notification';
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 2000); // Hide notification after 2 seconds
-        }
-
         // Automatically load files if sessionURL parameter is present in the URL
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -575,3 +578,4 @@
     </script>
 </body>
 </html>
+
