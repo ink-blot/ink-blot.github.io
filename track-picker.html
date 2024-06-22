@@ -235,7 +235,7 @@
             trackDataStore = {};
 
             const fileList = document.getElementById('jsonFiles').files;
-            const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
+            const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => decodeURIComponent(url.trim())).filter(url => url);
 
             const allPromises = [];
 
