@@ -167,10 +167,11 @@
         <input type="file" id="jsonFiles" name="jsonFiles" accept=".json" multiple style="display: none;" onchange="displaySelectedFiles()">
     </label>
     <div id="fileList" class="file-list"></div>
+    <div id="blobCount" class="file-list"></div>
     <br><br>
 
-    <label for="urlInput" class="centered">and/or enter comma-separated URLs:</label>
-    <input type="text" id="urlInput" class="form-control" placeholder="Enter URLs here" style="width: 80%;">
+    <label for="urlInput" class="centered">and/or enter comma-separated URLs or blobs:</label>
+    <input type="text" id="urlInput" class="form-control" placeholder="Enter URLs or blobs here" style="width: 80%;">
     <br><br>
 
     <button class="btn btn-primary" onclick="loadFiles()">Load Files</button>
@@ -235,7 +236,7 @@
             trackDataStore = {};
 
             const fileList = document.getElementById('jsonFiles').files;
-            const enteredURLs = document.getElementById('urlInput').value.split(/[%2C,]+/).map(url => url.trim()).filter(url => url);
+            const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
 
             const allPromises = [];
 
@@ -243,12 +244,12 @@
                 allPromises.push(readFile(file));
             }
 
-            for (const url of enteredURLs) {
-                if (url.startsWith('blob:')) {
-                    allPromises.push(loadBlobURL(url));
+            for (const urlOrBlob of enteredURLs) {
+                if (urlOrBlob.startsWith('blob:')) {
+                    allPromises.push(loadBlob(urlOrBlob.replace('blob:', '')));
                 } else {
                     // Convert regular GitHub URLs to raw content URLs
-                    const rawUrl = url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+                    const rawUrl = urlOrBlob.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
                     allPromises.push(loadJSON(rawUrl));
                 }
             }
@@ -269,9 +270,9 @@
                 document.getElementById('generateSessionButton').style.display = 'inline-block';
             }
 
-            // Display the number of blob URLs loaded
+            // Display the number of blobs loaded
             const blobCount = enteredURLs.filter(url => url.startsWith('blob:')).length;
-            document.getElementById('fileList').textContent = `${blobCount} blob files loaded.`;
+            document.getElementById('blobCount').innerText = `${blobCount} blob files loaded.`;
         }
 
         function uncompressString(enc) {
@@ -289,17 +290,13 @@
             return str;
         }
 
-        async function loadBlobURL(url) {
+        async function loadBlob(blobContent) {
             try {
-                const blobUrlParam = url.startsWith('blob:') ? url.substring(5) : new URL(url).searchParams.get('sessionURL');
-                if (!blobUrlParam) {
-                    throw new Error('Invalid blob URL: sessionURL parameter is missing');
-                }
-                const decompressedData = uncompressString(blobUrlParam);
+                const decompressedData = uncompressString(blobContent);
                 return JSON.parse(decompressedData);
             } catch (error) {
-                console.error(`Failed to process blob URL ${url}:`, error);
-                alert(`Failed to process blob URL ${url}: ${error.message}`);
+                console.error(`Failed to process blob:`, error);
+                alert(`Failed to process blob: ${error.message}`);
             }
         }
 
@@ -518,66 +515,43 @@
             const compressedString = compressString(JSON.stringify(sessionJson));
             const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.textContent = 'Open Link';
-            link.target = '_blank';
-
-            const copyIcon = document.createElement('span');
-            copyIcon.className = 'copy-icon';
-            copyIcon.textContent = '📋';
-            copyIcon.onclick = () => {
-                navigator.clipboard.writeText(blobUrl).then(() => {
-                    const notification = document.getElementById('copyNotification');
-                    notification.style.display = 'inline';
-                    setTimeout(() => {
-                        notification.style.display = 'none';
-                    }, 2000);
-                });
-            };
-
-            const notification = document.createElement('span');
-            notification.id = 'copyNotification';
-            notification.className = 'copy-notification';
-            notification.textContent = 'Link copied!';
-
-            const output = document.getElementById('blobUrlOutput');
-            output.innerHTML = '';
-            output.appendChild(link);
-            output.appendChild(copyIcon);
-            output.appendChild(notification);
-
+            document.getElementById('blobUrlOutput').innerText = blobUrl;
             document.getElementById('blobUrlHeader').style.display = 'block';
         }
 
-        function saveSessionFile() {
-            const sessionJson = document.getElementById('sessionJsonOutput').textContent;
-            const blob = new Blob([sessionJson], { type: "application/json" });
-            const filename = document.getElementById('filenameInput').value;
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-            document.getElementById('saveNotification').textContent = `File saved as: ${filename}`;
-            document.getElementById('saveNotification').style.display = 'block';
-        }
-
         function toggleSelectAll(selectAllCheckbox) {
-            const table = selectAllCheckbox.closest('table');
-            const checkboxes = table.querySelectorAll('.track-checkbox');
+            const checkboxes = document.querySelectorAll('.track-checkbox');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = selectAllCheckbox.checked;
             });
         }
 
-        window.onload = function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionURL = urlParams.get('sessionURL');
+        function saveSessionFile() {
+            const blob = new Blob([document.getElementById('sessionJsonOutput').value], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = document.getElementById('filenameInput').value || 'session.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
 
-            if (sessionURL) {
-                const urls = sessionURL.split(/[%2C,]+/).map(url => url.trim()).filter(url => url);
-                document.getElementById('urlInput').value = urls.join(',');
-                loadFiles();
+            // Show save notification
+            const saveNotification = document.getElementById('saveNotification');
+            saveNotification.style.display = 'block';
+            setTimeout(() => {
+                saveNotification.style.display = 'none';
+            }, 2000); // Hide notification after 2 seconds
+        }
+
+        // Automatically load files if sessionURL parameter is present in the URL
+        window.onload = async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionURLs = urlParams.get('sessionURL');
+
+            if (sessionURLs) {
+                document.getElementById('urlInput').value = sessionURLs.split('%2C').map(url => 'blob:' + url).join(', ');
+                await loadFiles();
             }
         }
     </script>
