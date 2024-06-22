@@ -235,7 +235,7 @@
             trackDataStore = {};
 
             const fileList = document.getElementById('jsonFiles').files;
-            const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => decodeURIComponent(url.trim())).filter(url => url);
+            const enteredURLs = document.getElementById('urlInput').value.split(',').map(url => url.trim()).filter(url => url);
 
             const allPromises = [];
 
@@ -244,9 +244,7 @@
             }
 
             for (const urlOrBlob of enteredURLs) {
-                if (urlOrBlob.includes('sessionURL=blob:')) {
-                    allPromises.push(loadBlobURL(urlOrBlob));
-                } else if (urlOrBlob.startsWith('blob:')) {
+                if (urlOrBlob.startsWith('blob:')) {
                     allPromises.push(loadBlob(urlOrBlob));
                 } else {
                     // Convert regular GitHub URLs to raw content URLs
@@ -293,12 +291,12 @@
                 if (!blobUrlParam) {
                     throw new Error('Invalid blob URL: sessionURL parameter is missing');
                 }
-                const blobUrls = blobUrlParam.split('%2C').map(blobUrl => blobUrl.replace('blob:', ''));
-                const allData = await Promise.all(blobUrls.map(blobUrl => {
-                    const decompressedData = uncompressString(blobUrl);
+                const blobs = blobUrlParam.split('%2C');
+                const allData = await Promise.all(blobs.map(blob => {
+                    const decompressedData = uncompressString(blob.replace('blob:', ''));
                     return JSON.parse(decompressedData);
                 }));
-                return allData;
+                return allData.flat();
             } catch (error) {
                 console.error(`Failed to process blob URL ${url}:`, error);
                 alert(`Failed to process blob URL ${url}: ${error.message}`);
@@ -307,12 +305,12 @@
 
         async function loadBlob(blob) {
             try {
-                const blobUrls = blob.split('%2C').map(blobUrl => blobUrl.replace('blob:', ''));
-                const allData = await Promise.all(blobUrls.map(blobUrl => {
-                    const decompressedData = uncompressString(blobUrl);
+                const blobs = blob.split('%2C');
+                const allData = await Promise.all(blobs.map(blob => {
+                    const decompressedData = uncompressString(blob.replace('blob:', ''));
                     return JSON.parse(decompressedData);
                 }));
-                return allData;
+                return allData.flat();
             } catch (error) {
                 console.error(`Failed to process blob ${blob}:`, error);
                 alert(`Failed to process blob ${blob}: ${error.message}`);
