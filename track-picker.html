@@ -245,7 +245,7 @@
 
             for (const urlOrBlob of enteredURLs) {
                 if (urlOrBlob.startsWith('blob:')) {
-                    allPromises.push(loadBlob(urlOrBlob));
+                    allPromises.push(loadBlob(urlOrBlob.replace('blob:', '')));
                 } else {
                     // Convert regular GitHub URLs to raw content URLs
                     const rawUrl = urlOrBlob.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
@@ -285,14 +285,13 @@
             return str;
         }
 
-        async function loadBlob(blob) {
+        async function loadBlob(blobContent) {
             try {
-                const blobContent = blob.replace('blob:', '');
                 const decompressedData = uncompressString(blobContent);
                 return JSON.parse(decompressedData);
             } catch (error) {
-                console.error(`Failed to process blob ${blob}:`, error);
-                alert(`Failed to process blob ${blob}: ${error.message}`);
+                console.error(`Failed to process blob:`, error);
+                alert(`Failed to process blob: ${error.message}`);
             }
         }
 
@@ -567,8 +566,8 @@
             const urlParams = new URLSearchParams(window.location.search);
             const sessionURL = urlParams.get('sessionURL');
             if (sessionURL) {
-                const blobs = sessionURL.split('%2C').map(blob => `blob:${blob}`);
-                document.getElementById('urlInput').value = blobs.join(', ');
+                const blobs = sessionURL.split('%2C').map(blob => blob.replace(/^blob:/, ''));
+                document.getElementById('urlInput').value = blobs.map(blob => `blob:${blob}`).join(', ');
                 await loadFiles();
                 alert(`Loaded ${blobs.length} blobs.`);
             }
