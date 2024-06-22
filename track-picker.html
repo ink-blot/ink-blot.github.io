@@ -510,68 +510,45 @@
             const compressedString = compressString(JSON.stringify(sessionJson));
             const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.textContent = 'Open Link';
-            link.target = '_blank';
-
-            const copyIcon = document.createElement('span');
-            copyIcon.className = 'copy-icon';
-            copyIcon.textContent = '📋';
-            copyIcon.onclick = () => {
-                navigator.clipboard.writeText(blobUrl).then(() => {
-                    const notification = document.getElementById('copyNotification');
-                    notification.style.display = 'inline';
-                    setTimeout(() => {
-                        notification.style.display = 'none';
-                    }, 2000);
-                });
-            };
-
-            const notification = document.createElement('span');
-            notification.id = 'copyNotification';
-            notification.className = 'copy-notification';
-            notification.textContent = 'Link copied!';
-
-            const output = document.getElementById('blobUrlOutput');
-            output.innerHTML = '';
-            output.appendChild(link);
-            output.appendChild(copyIcon);
-            output.appendChild(notification);
-
+            document.getElementById('blobUrlOutput').innerText = blobUrl;
             document.getElementById('blobUrlHeader').style.display = 'block';
         }
 
-        function saveSessionFile() {
-            const sessionJson = document.getElementById('sessionJsonOutput').textContent;
-            const blob = new Blob([sessionJson], { type: "application/json" });
-            const filename = document.getElementById('filenameInput').value;
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-            document.getElementById('saveNotification').textContent = `File saved as: ${filename}`;
-            document.getElementById('saveNotification').style.display = 'block';
-        }
-
         function toggleSelectAll(selectAllCheckbox) {
-            const table = selectAllCheckbox.closest('table');
-            const checkboxes = table.querySelectorAll('.track-checkbox');
+            const checkboxes = document.querySelectorAll('.track-checkbox');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = selectAllCheckbox.checked;
             });
         }
 
-        window.onload = async () => {
+        function saveSessionFile() {
+            const blob = new Blob([document.getElementById('sessionJsonOutput').value], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = document.getElementById('filenameInput').value || 'session.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // Show save notification
+            const saveNotification = document.getElementById('saveNotification');
+            saveNotification.style.display = 'block';
+            setTimeout(() => {
+                saveNotification.style.display = 'none';
+            }, 2000); // Hide notification after 2 seconds
+        }
+
+        // Automatically load files if sessionURL parameter is present in the URL
+        window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const sessionURL = urlParams.get('sessionURL');
-            if (sessionURL) {
-                const blobs = sessionURL.split('%2C').map(blob => blob.replace(/^blob:/, ''));
-                document.getElementById('urlInput').value = blobs.map(blob => `blob:${blob}`).join(', ');
+            const sessionURLs = urlParams.get('sessionURL');
+
+            if (sessionURLs) {
+                document.getElementById('urlInput').value = sessionURLs.split('%2C').map(url => 'blob:' + url).join(', ');
                 await loadFiles();
-                alert(`Loaded ${blobs.length} blobs.`);
             }
-        };
+        }
     </script>
 </body>
 </html>
