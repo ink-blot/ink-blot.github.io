@@ -403,7 +403,7 @@
 
                             <div id="igv-app-qrcode-button">QR CODE</div>
 
-                            <div id="igv-app-edit-button">EDIT</div>
+                            <div id="igv-app-edit-button" style="cursor: pointer;">EDIT</div>
 
                         </div>
 
@@ -524,7 +524,14 @@
 <script>
     document.getElementById('igv-app-edit-button').addEventListener('click', function () {
         var shareInput = document.getElementById('igv-app-share-input').value;
-        var newUrl = shareInput.replace('?', '/track-picker.html?');
+        var newUrl;
+        if (shareInput.includes('index.html?')) {
+            newUrl = shareInput.replace('index.html?', 'track-picker.html?');
+        } else if (shareInput.includes('/?')) {
+            newUrl = shareInput.replace('/?', '/track-picker.html?');
+        } else {
+            newUrl = shareInput.replace('?', '/track-picker.html?');
+        }
         window.location.href = newUrl;
     });
 </script>
