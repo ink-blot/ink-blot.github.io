@@ -515,13 +515,18 @@
             const compressedString = compressString(JSON.stringify(sessionJson));
             const blobUrl = `https://ink-blot.github.io/?sessionURL=blob:${compressedString}`;
 
-            const blobLink = document.createElement('a');
-            blobLink.href = blobUrl;
-            blobLink.innerText = blobUrl;
-            blobLink.target = "_blank";  // Open in a new tab
-            document.getElementById('blobUrlOutput').innerHTML = '';  // Clear previous content
-            document.getElementById('blobUrlOutput').appendChild(blobLink);
+            document.getElementById('blobUrlOutput').innerHTML = `<a href="${blobUrl}" target="_blank">Click link</a> <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${blobUrl}')"></i>`;
             document.getElementById('blobUrlHeader').style.display = 'block';
+        }
+
+        function copyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('Link copied to clipboard');
         }
 
         function toggleSelectAll(selectAllCheckbox) {
@@ -563,3 +568,4 @@
     </script>
 </body>
 </html>
+
