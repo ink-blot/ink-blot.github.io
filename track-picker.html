@@ -234,32 +234,35 @@
             tablesContainer.innerHTML = '';
             originalData = [];
             trackDataStore = {};
-
+        
             const fileList = document.getElementById('jsonFiles').files;
             const enteredURLs = document.getElementById('urlInput').value.split(/,|%2C/).map(url => url.trim()).filter(url => url);
-
+        
             const allPromises = [];
-
+        
             for (const file of fileList) {
                 allPromises.push(readFile(file));
             }
-
+        
             for (const urlOrBlob of enteredURLs) {
-                if (urlOrBlob.startsWith('https://ink-blot.github.io/?sessionURL=blob:')) {
-                    const blobContent = urlOrBlob.replace('https://ink-blot.github.io/?sessionURL=blob:', '');
+                const blobPrefix = 'blob:';
+                const sessionURLPrefix = '?sessionURL=';
+                
+                if (urlOrBlob.includes(sessionURLPrefix) && urlOrBlob.includes(blobPrefix)) {
+                    const blobContent = urlOrBlob.split(sessionURLPrefix)[1].replace(blobPrefix, '');
                     allPromises.push(loadBlob(blobContent));
-                } else if (urlOrBlob.startsWith('blob:')) {
-                    allPromises.push(loadBlob(urlOrBlob.replace('blob:', '')));
+                } else if (urlOrBlob.startsWith(blobPrefix)) {
+                    allPromises.push(loadBlob(urlOrBlob.replace(blobPrefix, '')));
                 } else {
                     // Convert regular GitHub URLs to raw content URLs
                     const rawUrl = urlOrBlob.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
                     allPromises.push(loadJSON(rawUrl));
                 }
             }
-
+        
             const allData = await Promise.all(allPromises);
             originalData = allData.flat().filter(data => data); // Filter out any null or undefined results
-
+        
             originalData.forEach((data, dataIndex) => {
                 if (data.reference && data.tracks) {
                     processSessionJSON(data, dataIndex);
@@ -267,16 +270,17 @@
                     processGenomeJSON(data, dataIndex);
                 }
             });
-
+        
             if (originalData.length > 0) {
                 document.getElementById('trackDataHeader').style.display = 'block';
                 document.getElementById('generateSessionButton').style.display = 'inline-block';
             }
-
+        
             // Update blob count
-            const blobCount = enteredURLs.filter(url => url.startsWith('blob:') || url.startsWith('https://ink-blot.github.io/?sessionURL=blob:')).length;
+            const blobCount = enteredURLs.filter(url => url.includes(blobPrefix)).length;
             document.getElementById('blobCount').innerText = `Loaded ${blobCount} blob(s)`;
         }
+
 
         function uncompressString(enc) {
             enc = enc.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=');
