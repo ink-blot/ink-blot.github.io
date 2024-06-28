@@ -2,5 +2,5 @@
   <a href="https://ink-blot.github.io/index.html">ink-blot.github.io Genome Browser</a>
 </div>
 <div id="aws_s3_Genome_Browser" align="center">
-  <a href="https://daf-mango.s3.ap-southeast-2.amazonaws.com/index.html">aws s3 Genome Browser</a>
+  <a href="https://github.com/ink-blot/s3-genome-browser/blob/main/README.md">S3 Genome Browser</a>
 </div>
